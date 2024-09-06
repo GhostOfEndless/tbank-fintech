@@ -52,7 +52,7 @@ class JsonFileUtilImplTest {
     void testReadCityFromFileInvalidJson() throws Exception {
         String filepath = "city-error.json";
         when(objectMapper.readValue(any(String.class), eq(City.class)))
-                .thenThrow(new JsonMappingException(null, "Test Error"));
+                .thenThrow(new JsonMappingException(null, "Test error"));
 
         Optional<City> result = jsonFileUtil.readCityFromFile(filepath);
 
@@ -74,7 +74,7 @@ class JsonFileUtilImplTest {
     @Test
     @DisplayName("Save data to file successfully")
     void testSaveDataToFileSuccess() throws IOException {
-        String filepath = "output.txt";
+        String filepath = "city.xml";
         String data = "some data";
 
         jsonFileUtil.saveDataToFile(data, filepath);
