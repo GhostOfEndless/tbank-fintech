@@ -6,6 +6,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.BufferedWriter;
@@ -16,10 +17,16 @@ import java.nio.file.Paths;
 import java.util.Optional;
 
 @Slf4j
+@AllArgsConstructor
 public class JsonFileUtilImpl implements JsonFileUtil {
 
-    private final ObjectMapper mapper = new ObjectMapper();
-    private final XmlMapper xmlMapper = new XmlMapper();
+    private ObjectMapper mapper;
+    private XmlMapper xmlMapper;
+
+    public JsonFileUtilImpl() {
+        this.mapper = new ObjectMapper();
+        this.xmlMapper = new XmlMapper();
+    }
 
     @Override
     public Optional<City> readCityFromFile(String filepath) {

@@ -15,7 +15,7 @@ public class Main {
     private static final JsonFileUtil jsonUtil = new JsonFileUtilImpl();
 
     public static void main(String[] args) {
-        log.info("******* Task 1 ***********");
+        log.info("****************** Task 1 *********************");
         log.info("Reading city.json...");
         var city = jsonUtil.readCityFromFile("city.json");
         printCity(city.orElse(null));
@@ -31,7 +31,7 @@ public class Main {
         log.info("Saving string content to xml file...");
         jsonUtil.saveDataToFile(content, "city.xml");
 
-        log.info("******* Task 2 ***********");
+        log.info("******************* Task 2 *********************");
         CustomLinkedList<Integer> list = new CustomLinkedList<>();
         list.add(1);
         list.get(0);

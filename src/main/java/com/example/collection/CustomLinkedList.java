@@ -87,7 +87,7 @@ public class CustomLinkedList<E> {
      */
     public boolean addAll(Collection<? extends E> collection) {
         boolean flag = true;
-        for (E element: collection) {
+        for (E element : collection) {
             flag &= add(element);
         }
         return flag;
@@ -110,7 +110,9 @@ public class CustomLinkedList<E> {
         return false;
     }
 
-    /** Returns the node at the given index.
+    /**
+     * Returns the node at the given index.
+     *
      * @param index the index of the node to retrieve
      * @return the node at the specified index
      * @throws IndexOutOfBoundsException if the index is out of range
@@ -120,7 +122,7 @@ public class CustomLinkedList<E> {
             throw new IndexOutOfBoundsException("Index %d out of bounds".formatted(index));
         }
         Node node = this.head;
-        for (int i=0; i < index; i++) {
+        for (int i = 0; i < index; i++) {
             node = node.next;
         }
         return node;
