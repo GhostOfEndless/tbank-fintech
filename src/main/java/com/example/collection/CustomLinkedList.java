@@ -111,6 +111,15 @@ public class CustomLinkedList<E> {
     }
 
     /**
+     * Returns the current size of linked list
+     *
+     * @return the current size of linked list
+     */
+    public int size() {
+        return this.size;
+    }
+
+    /**
      * Returns the node at the given index.
      *
      * @param index the index of the node to retrieve

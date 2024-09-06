@@ -28,8 +28,12 @@ public class Main {
                 list.add(1));
         log.info("First element after this: {}",
                 list.get(0));
+        log.info("Current size of list is: {}",
+                list.size());
         log.info("Removing element '{}' from list...",
                 list.remove(0));
+        log.info("Current size of list is: {}",
+                list.size());
         log.info("Is list contains '1'? - {}",
                 list.contains(1));
         log.info("Adding to list numbers '1, 2, 3'. Result is {}",
@@ -44,6 +48,8 @@ public class Main {
                 }, (list1, list2) -> list1);
 
         log.info("New list with data from stream: {}", list);
+        log.info("Current size of list is: {}",
+                list.size());
     }
 
     private static void testJson() {

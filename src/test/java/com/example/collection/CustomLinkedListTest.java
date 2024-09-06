@@ -132,5 +132,27 @@ class CustomLinkedListTest {
             list.add(3);
             assertEquals("[1, 2, 3]", list.toString());
         }
+
+        @Test
+        @DisplayName("Verify size of an empty list is zero")
+        void testSizeEmptyList() {
+            assertEquals(0, list.size());
+        }
+
+        @Test
+        @DisplayName("Verify size after adding one element")
+        void testSizeAfterAddingOneElement() {
+            list.add(1);
+            assertEquals(1, list.size());
+        }
+
+        @Test
+        @DisplayName("Verify size after removing an element")
+        void testSizeAfterRemovingElement() {
+            list.add(1);
+            list.add(2);
+            list.remove(0);
+            assertEquals(1, list.size());
+        }
     }
 }
