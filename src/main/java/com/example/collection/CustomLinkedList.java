@@ -1,9 +1,9 @@
 package com.example.collection;
 
-import java.util.Collection;
+import java.util.Iterator;
 import java.util.Objects;
 
-public class CustomLinkedList<E> {
+public class CustomLinkedList<E> implements Iterable<E> {
 
     private class Node {
         public E data;
@@ -85,7 +85,7 @@ public class CustomLinkedList<E> {
      * @return {@code true} if all elements were successfully added to the list, {@code false} otherwise
      * @throws NullPointerException if the specified collection is {@code null}
      */
-    public boolean addAll(Collection<? extends E> collection) {
+    public boolean addAll(Iterable<? extends E> collection) {
         boolean flag = true;
         for (E element : collection) {
             flag &= add(element);
@@ -120,6 +120,22 @@ public class CustomLinkedList<E> {
     }
 
     /**
+     * Creates a new {@code CustomLinkedList} containing the specified elements.
+     *
+     * @param elements the elements to be added to the list
+     * @return a new {@code CustomLinkedList} with the specified elements
+     * @throws NullPointerException if any of the elements is null
+     */
+    @SafeVarargs
+    public static <E> CustomLinkedList<E> of(E... elements) {
+        CustomLinkedList<E> list = new CustomLinkedList<>();
+        for (E element : elements) {
+            list.add(element);
+        }
+        return list;
+    }
+
+    /**
      * Returns the node at the given index.
      *
      * @param index the index of the node to retrieve
@@ -135,6 +151,32 @@ public class CustomLinkedList<E> {
             node = node.next;
         }
         return node;
+    }
+
+    /**
+     * Returns an iterator over the elements in this linked list.
+     * It provides methods to check if more elements are available ({@code hasNext()})
+     * and to retrieve the next element ({@code next()}).
+     *
+     * @return an {@code Iterator<E>} over the elements in this list
+     */
+    @Override
+    public Iterator<E> iterator() {
+        return new Iterator<>() {
+            private Node current = head;
+
+            @Override
+            public boolean hasNext() {
+                return current != null;
+            }
+
+            @Override
+            public E next() {
+                E data = current.data;
+                current = current.next;
+                return data;
+            }
+        };
     }
 
     /**

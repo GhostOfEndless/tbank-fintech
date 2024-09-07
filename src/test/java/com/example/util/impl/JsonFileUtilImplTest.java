@@ -9,14 +9,14 @@ import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -43,8 +43,7 @@ class JsonFileUtilImplTest {
 
         Optional<City> result = jsonFileUtil.readCityFromFile(filepath);
 
-        assertTrue(result.isPresent());
-        assertEquals(expectedCity, result.get());
+        assertThat(result).isPresent().contains(expectedCity);
     }
 
     @Test
@@ -56,7 +55,7 @@ class JsonFileUtilImplTest {
 
         Optional<City> result = jsonFileUtil.readCityFromFile(filepath);
 
-        assertFalse(result.isPresent());
+        assertThat(result).isNotPresent();
     }
 
     @Test
@@ -68,22 +67,19 @@ class JsonFileUtilImplTest {
 
         String result = jsonFileUtil.toXML(city);
 
-        assertEquals(expectedXml, result);
+        assertThat(result).isEqualTo(expectedXml);
     }
 
     @Test
     @DisplayName("Save data to file successfully")
-    void testSaveDataToFileSuccess() throws IOException {
-        String filepath = "city.xml";
+    void testSaveDataToFileSuccess(@TempDir Path tempDir) throws IOException {
+        Path tempFile = tempDir.resolve("city.xml");
         String data = "some data";
 
-        jsonFileUtil.saveDataToFile(data, filepath);
+        jsonFileUtil.saveDataToFile(data, tempFile.toString());
 
-        Path path = Paths.get(filepath);
-        assertTrue(Files.exists(path));
-        String content = new String(Files.readAllBytes(path));
-        assertEquals(data, content);
-
-        Files.deleteIfExists(path);
+        assertThat(Files.exists(tempFile)).isTrue();
+        String content = new String(Files.readAllBytes(tempFile));
+        assertThat(content).isEqualTo(data);
     }
 }

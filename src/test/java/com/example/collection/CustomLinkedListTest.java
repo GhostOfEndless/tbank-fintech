@@ -5,7 +5,8 @@ import org.junit.jupiter.api.*;
 import java.util.Collections;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class CustomLinkedListTest {
 
@@ -24,28 +25,23 @@ class CustomLinkedListTest {
         @Test
         @DisplayName("Add a single element to the list and verify it's correctly added")
         void testAddSingleElement() {
-            assertTrue(list.add(1));
-            assertEquals(1, list.get(0));
+            assertThat(list.add(1)).isTrue();
+            assertThat(list.get(0)).isEqualTo(1);
         }
 
         @Test
         @DisplayName("Add multiple elements and verify their order in the list")
         void testAddMultipleElements() {
-            list.add(1);
-            list.add(2);
-            list.add(3);
-            assertEquals(1, list.get(0));
-            assertEquals(2, list.get(1));
-            assertEquals(3, list.get(2));
+            list.addAll(CustomLinkedList.of(1, 2, 3));
+            assertThat(list).containsExactlyElementsOf(CustomLinkedList.of(1, 2, 3));
         }
 
         @Test
         @DisplayName("Remove an element by valid index and check the list updates correctly")
         void testRemoveValidIndex() {
-            list.add(1);
-            list.add(2);
-            assertEquals(1, list.remove(0));
-            assertEquals(2, list.get(0));
+            list.addAll(CustomLinkedList.of(1, 2));
+            assertThat(list.remove(0)).isEqualTo(1);
+            assertThat(list.get(0)).isEqualTo(2);
         }
     }
 
@@ -58,20 +54,22 @@ class CustomLinkedListTest {
         @DisplayName("Attempt to get an element with an invalid index and expect an exception")
         void testGetWithInvalidIndex() {
             list.add(1);
-            assertThrows(IndexOutOfBoundsException.class, () -> list.get(1));
+            assertThatThrownBy(() -> list.get(1))
+                    .isInstanceOf(IndexOutOfBoundsException.class);
         }
 
         @Test
         @DisplayName("Attempt to remove an element with an invalid index and expect an exception")
         void testRemoveInvalidIndex() {
             list.add(1);
-            assertThrows(IndexOutOfBoundsException.class, () -> list.remove(1));
+            assertThatThrownBy(() -> list.remove(1))
+                    .isInstanceOf(IndexOutOfBoundsException.class);
         }
 
         @Test
         @DisplayName("Check if a non-existing element is not found in an empty list")
         void testContainsEmptyList() {
-            assertFalse(list.contains(1));
+            assertThat(list).doesNotContain(1);
         }
     }
 
@@ -84,32 +82,29 @@ class CustomLinkedListTest {
         @DisplayName("Add a collection of elements to the list and verify their order")
         void testAddAll() {
             list.addAll(List.of(1, 2, 3));
-            assertEquals(1, list.get(0));
-            assertEquals(2, list.get(1));
-            assertEquals(3, list.get(2));
+            assertThat(list).containsExactlyElementsOf(List.of(1, 2, 3));
         }
 
         @Test
         @DisplayName("Add an empty collection and expect no elements in the list")
         void testAddAllEmpty() {
-            assertTrue(list.addAll(Collections.emptyList()));
-            assertThrows(IndexOutOfBoundsException.class, () -> list.get(0));
+            assertThat(list.addAll(Collections.emptyList())).isTrue();
+            assertThatThrownBy(() -> list.get(0))
+                    .isInstanceOf(IndexOutOfBoundsException.class);
         }
 
         @Test
         @DisplayName("Check if an existing element is present in the list")
         void testContainsElementFound() {
-            list.add(1);
-            list.add(2);
-            assertTrue(list.contains(2));
+            list.addAll(CustomLinkedList.of(1, 2));
+            assertThat(list).contains(2);
         }
 
         @Test
         @DisplayName("Check if a non-existing element is not present in the list")
         void testContainsElementNotFound() {
-            list.add(1);
-            list.add(2);
-            assertFalse(list.contains(3));
+            list.addAll(CustomLinkedList.of(1, 2));
+            assertThat(list).doesNotContain(3);
         }
     }
 
@@ -121,38 +116,35 @@ class CustomLinkedListTest {
         @Test
         @DisplayName("Convert an empty list to a string representation")
         void testToStringEmptyList() {
-            assertEquals("[]", list.toString());
+            assertThat(list).hasToString("[]");
         }
 
         @Test
         @DisplayName("Convert a list with elements to a string representation")
         void testToStringWithElements() {
-            list.add(1);
-            list.add(2);
-            list.add(3);
-            assertEquals("[1, 2, 3]", list.toString());
+            list.addAll(CustomLinkedList.of(1, 2, 3));
+            assertThat(list).hasToString("[1, 2, 3]");
         }
 
         @Test
         @DisplayName("Verify size of an empty list is zero")
         void testSizeEmptyList() {
-            assertEquals(0, list.size());
+            assertThat(list).isEmpty();
         }
 
         @Test
         @DisplayName("Verify size after adding one element")
         void testSizeAfterAddingOneElement() {
             list.add(1);
-            assertEquals(1, list.size());
+            assertThat(list).hasSize(1);
         }
 
         @Test
         @DisplayName("Verify size after removing an element")
         void testSizeAfterRemovingElement() {
-            list.add(1);
-            list.add(2);
+            list.addAll(CustomLinkedList.of(1, 2));
             list.remove(0);
-            assertEquals(1, list.size());
+            assertThat(list).hasSize(1);
         }
     }
 }

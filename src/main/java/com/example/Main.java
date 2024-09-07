@@ -9,6 +9,8 @@ import lombok.extern.slf4j.Slf4j;
 import java.util.List;
 import java.util.stream.Stream;
 
+import static com.example.collection.CustomLinkedListCollector.toCustomLinkedList;
+
 @Slf4j
 public class Main {
 
@@ -42,10 +44,7 @@ public class Main {
 
         log.info("Changing list with Stream reduce...");
         list = Stream.of(4, 5, 6)
-                .reduce(new CustomLinkedList<>(), (customList, item) -> {
-                    customList.add(item);
-                    return customList;
-                }, (list1, list2) -> list1);
+                .collect(toCustomLinkedList());
 
         log.info("New list with data from stream: {}", list);
         log.info("Current size of list is: {}",
