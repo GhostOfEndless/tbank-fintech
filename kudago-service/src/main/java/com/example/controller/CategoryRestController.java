@@ -1,5 +1,6 @@
 package com.example.controller;
 
+import com.example.aspect.LogExecutionTime;
 import com.example.controller.payload.CategoryPayload;
 import com.example.entity.Category;
 import com.example.service.CategoryService;
@@ -15,6 +16,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.NoSuchElementException;
 
+@LogExecutionTime
 @RestController
 @RequestMapping("/api/v1/places/categories")
 @RequiredArgsConstructor

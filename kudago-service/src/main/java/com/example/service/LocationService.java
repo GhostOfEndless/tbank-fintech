@@ -3,7 +3,6 @@ package com.example.service;
 import com.example.client.KudaGoApiClient;
 import com.example.entity.Location;
 import com.example.repository.LocationRepository;
-import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -19,8 +18,7 @@ public class LocationService {
     private final LocationRepository repository;
     private final KudaGoApiClient kudaGoApiClient;
 
-    @PostConstruct
-    private void init() {
+    public void init() {
         log.info("Fetching locations from API...");
         kudaGoApiClient.fetchLocations()
                 .forEach(payload -> repository.save(
@@ -43,9 +41,9 @@ public class LocationService {
     public Location createLocation(String slug, String name) {
         return repository.save(
                 Location.builder()
-                .slug(slug)
-                .name(name)
-                .build());
+                        .slug(slug)
+                        .name(name)
+                        .build());
     }
 
     public Location updateLocation(Long id, String slug, String name) {

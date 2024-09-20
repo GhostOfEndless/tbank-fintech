@@ -9,7 +9,7 @@ import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 
-public class InMemoryRepositoryImpl <V extends AbstractEntity> implements InMemoryRepository<Long, V> {
+public class InMemoryRepositoryImpl<V extends AbstractEntity> implements InMemoryRepository<Long, V> {
 
     private final ConcurrentHashMap<Long, V> storage = new ConcurrentHashMap<>();
     private final AtomicLong idCounter = new AtomicLong();
@@ -30,7 +30,7 @@ public class InMemoryRepositoryImpl <V extends AbstractEntity> implements InMemo
             if (entity.getId() != null && storage.containsKey(entity.getId())) {
                 storage.put(entity.getId(), entity);
             } else {
-                Long id = idCounter.incrementAndGet();
+                var id = idCounter.incrementAndGet();
                 entity.setId(id);
                 storage.put(id, entity);
             }

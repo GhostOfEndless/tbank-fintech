@@ -3,7 +3,6 @@ package com.example.service;
 import com.example.client.KudaGoApiClient;
 import com.example.entity.Category;
 import com.example.repository.CategoryRepository;
-import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -19,8 +18,7 @@ public class CategoryService {
     private final CategoryRepository repository;
     private final KudaGoApiClient kudaGoApiClient;
 
-    @PostConstruct
-    private void init() {
+    public void init() {
         log.info("Fetching categories from API...");
         kudaGoApiClient.fetchCategories()
                 .forEach(payload -> repository.save(

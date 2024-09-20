@@ -1,5 +1,6 @@
 package com.example.controller;
 
+import com.example.aspect.LogExecutionTime;
 import com.example.controller.payload.LocationPayload;
 import com.example.entity.Location;
 import com.example.service.LocationService;
@@ -15,6 +16,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.NoSuchElementException;
 
+@LogExecutionTime
 @RestController
 @RequestMapping("/api/v1/locations")
 @RequiredArgsConstructor
