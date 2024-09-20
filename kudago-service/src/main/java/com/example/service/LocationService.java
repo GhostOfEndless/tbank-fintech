@@ -1,5 +1,6 @@
 package com.example.service;
 
+import com.example.client.KudaGoApiClient;
 import com.example.entity.Location;
 import com.example.repository.LocationRepository;
 import jakarta.annotation.PostConstruct;
@@ -8,6 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 
 @Slf4j
 @Service
@@ -15,10 +17,18 @@ import java.util.List;
 public class LocationService {
 
     private final LocationRepository repository;
+    private final KudaGoApiClient kudaGoApiClient;
 
     @PostConstruct
     private void init() {
-        log.info("LocationService initialization...");
+        log.info("Fetching locations from API...");
+        kudaGoApiClient.fetchLocations()
+                .forEach(payload -> repository.save(
+                        Location.builder()
+                                .slug(payload.slug())
+                                .name(payload.name())
+                                .build()));
+        log.info("Locations added!");
     }
 
     public List<Location> getAllLocations() {
@@ -27,7 +37,7 @@ public class LocationService {
 
     public Location getLocationById(Long id) {
         return repository.findById(id).orElseThrow(() ->
-                new IllegalArgumentException("Location not found"));
+                new NoSuchElementException("location.not_found"));
     }
 
     public Location createLocation(String slug, String name) {

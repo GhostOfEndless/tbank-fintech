@@ -1,2 +1,10 @@
 server:
   port: 8080
+
+logging:
+  level:
+    com.example: debug
+
+kudago:
+  max-retries: 3
+  retry-delay: 3000
