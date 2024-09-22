@@ -8,3 +8,7 @@ logging:
 kudago:
   max-retries: 3
   retry-delay: 3000
+
+spring:
+  profiles:
+    active: prod

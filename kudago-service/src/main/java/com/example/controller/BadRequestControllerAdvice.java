@@ -1,5 +1,6 @@
 package com.example.controller;
 
+import com.example.aspect.LogExecutionTime;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.MessageSource;
 import org.springframework.http.HttpStatus;
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 
 import java.util.Locale;
 
+@LogExecutionTime
 @ControllerAdvice
 @RequiredArgsConstructor
 public class BadRequestControllerAdvice {

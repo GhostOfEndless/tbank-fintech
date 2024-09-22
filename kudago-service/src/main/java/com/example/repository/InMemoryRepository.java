@@ -12,4 +12,6 @@ public interface InMemoryRepository<K, V> {
     V save(V entity);
 
     void delete(K id);
+
+    boolean existsById(K id);
 }

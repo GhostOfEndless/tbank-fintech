@@ -22,3 +22,7 @@ dependencies {
 test {
     useJUnitPlatform()
 }
+
+tasks.test {
+    jvmArgs '-XX:+EnableDynamicAgentLoading'
+}

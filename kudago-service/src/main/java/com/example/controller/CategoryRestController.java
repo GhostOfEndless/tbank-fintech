@@ -38,7 +38,7 @@ public class CategoryRestController {
     @PostMapping
     public ResponseEntity<Category> createCategory(@Valid @RequestBody CategoryPayload category) {
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(categoryService.createCategory(category.name(), category.slug()));
+                .body(categoryService.createCategory(category.slug(), category.name()));
     }
 
     @PutMapping("/{id}")

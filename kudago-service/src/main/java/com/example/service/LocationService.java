@@ -47,15 +47,22 @@ public class LocationService {
     }
 
     public Location updateLocation(Long id, String slug, String name) {
-        return repository.save(
-                Location.builder()
-                        .id(id)
-                        .slug(slug)
-                        .name(name)
-                        .build());
+        if (repository.existsById(id)) {
+            return repository.save(
+                    Location.builder()
+                            .id(id)
+                            .slug(slug)
+                            .name(name)
+                            .build());
+        }
+        throw new NoSuchElementException("location.not_found");
     }
 
     public void deleteLocation(Long id) {
-        repository.delete(id);
+        if (repository.existsById(id)) {
+            repository.delete(getLocationById(id).getId());
+            return;
+        }
+        throw new NoSuchElementException("location.not_found");
     }
 }

@@ -47,15 +47,22 @@ public class CategoryService {
     }
 
     public Category updateCategory(Long id, String slug, String name) {
-        return repository.save(
-                Category.builder()
-                        .id(id)
-                        .slug(slug)
-                        .name(name)
-                        .build());
+        if (repository.existsById(id)) {
+            return repository.save(
+                    Category.builder()
+                            .id(id)
+                            .slug(slug)
+                            .name(name)
+                            .build());
+        }
+        throw new NoSuchElementException("category.not_found");
     }
 
     public void deleteCategory(Long id) {
-        repository.delete(id);
+        if (repository.existsById(id)) {
+            repository.delete(id);
+            return;
+        }
+        throw new NoSuchElementException("category.not_found");
     }
 }

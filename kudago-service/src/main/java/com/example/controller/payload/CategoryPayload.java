@@ -3,7 +3,9 @@ package com.example.controller.payload;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
+import lombok.Builder;
 
+@Builder
 public record CategoryPayload(
         @JsonProperty("slug")
         @NotBlank(message = "{category.request.slug.is_blank}")
