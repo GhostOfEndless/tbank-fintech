@@ -244,7 +244,7 @@ public class LocationRestControllerIT extends BaseIT {
         public void deleteLocation_success() {
             var createdLocation = createLocation("test", "Test Name");
 
-           deleteLocation(createdLocation.getId());
+            deleteLocation(createdLocation.getId());
 
             mockMvc.perform(get(uri + "/" + createdLocation.getId()))
                     .andExpect(status().isNotFound());

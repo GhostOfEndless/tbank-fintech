@@ -26,13 +26,13 @@ public class CategoryRestController {
     private final MessageSource messageSource;
 
     @GetMapping
-    public ResponseEntity<List<Category>> getAllCategories() {
-        return ResponseEntity.ok(categoryService.getAllCategories());
+    public List<Category> getAllCategories() {
+        return categoryService.getAllCategories();
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Category> getCategoryById(@PathVariable Long id) {
-        return ResponseEntity.ok(categoryService.getCategoryById(id));
+    public Category getCategoryById(@PathVariable Long id) {
+        return categoryService.getCategoryById(id);
     }
 
     @PostMapping
@@ -42,9 +42,9 @@ public class CategoryRestController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Category> updateCategory(@PathVariable Long id,
-                                                   @Valid @RequestBody CategoryPayload category) {
-        return ResponseEntity.ok(categoryService.updateCategory(id, category.slug(), category.name()));
+    public Category updateCategory(@PathVariable Long id,
+                                   @Valid @RequestBody CategoryPayload category) {
+        return categoryService.updateCategory(id, category.slug(), category.name());
     }
 
     @DeleteMapping("/{id}")

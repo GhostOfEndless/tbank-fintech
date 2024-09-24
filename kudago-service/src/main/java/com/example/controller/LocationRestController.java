@@ -26,25 +26,25 @@ public class LocationRestController {
     private final MessageSource messageSource;
 
     @GetMapping
-    public ResponseEntity<List<Location>> getAllLocations() {
-        return ResponseEntity.ok(locationService.getAllLocations());
+    public List<Location> getAllLocations() {
+        return locationService.getAllLocations();
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Location> getLocationById(@PathVariable Long id) {
-        return ResponseEntity.ok(locationService.getLocationById(id));
+    public Location getLocationById(@PathVariable Long id) {
+        return locationService.getLocationById(id);
     }
 
     @PostMapping
-    public ResponseEntity<Location> createLocation(@Valid  @RequestBody LocationPayload location) {
+    public ResponseEntity<Location> createLocation(@Valid @RequestBody LocationPayload location) {
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(locationService.createLocation(location.slug(), location.name()));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Location> updateLocation(@PathVariable Long id,
-                                                   @Valid @RequestBody LocationPayload location) {
-        return ResponseEntity.ok(locationService.updateLocation(id, location.slug(), location.name()));
+    public Location updateLocation(@PathVariable Long id,
+                                   @Valid @RequestBody LocationPayload location) {
+        return locationService.updateLocation(id, location.slug(), location.name());
     }
 
     @DeleteMapping("/{id}")

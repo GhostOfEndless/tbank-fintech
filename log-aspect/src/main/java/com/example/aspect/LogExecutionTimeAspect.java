@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 
 @Slf4j
 @Aspect
-@Component("logExecutionTimeAspect")
+@Component
 public class LogExecutionTimeAspect {
 
     @Around("@annotation(LogExecutionTime) || @within(LogExecutionTime)")
