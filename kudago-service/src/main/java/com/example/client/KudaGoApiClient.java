@@ -21,6 +21,7 @@ import java.util.List;
 public class KudaGoApiClient {
 
     private final RestClient restClient;
+    private final String kudaGoBaseUrl;
 
     @Retryable(
             maxAttemptsExpression = "${kudago.max-retries}",
@@ -28,7 +29,7 @@ public class KudaGoApiClient {
             retryFor = {RuntimeException.class}
     )
     public List<CategoryPayload> fetchCategories() {
-        return fetchData("https://kudago.com/public-api/v1.4/place-categories/", CategoryPayload[].class);
+        return fetchData(kudaGoBaseUrl + "/place-categories/", CategoryPayload[].class);
     }
 
     @Retryable(
@@ -37,7 +38,7 @@ public class KudaGoApiClient {
             retryFor = {RuntimeException.class}
     )
     public List<LocationPayload> fetchLocations() {
-        return fetchData("https://kudago.com/public-api/v1.4/locations/", LocationPayload[].class);
+        return fetchData(kudaGoBaseUrl + "/locations/", LocationPayload[].class);
     }
 
     private <T> List<T> fetchData(String uri, Class<T[]> responseType) {

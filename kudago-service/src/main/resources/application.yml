@@ -1,3 +1,4 @@
+#file: noinspection SpringBootApplicationYaml
 server:
   port: 8080
 
@@ -8,6 +9,7 @@ logging:
 kudago:
   max-retries: 3
   retry-delay: 3000
+  base-url: https://kudago.com/public-api/v1.4
 
 spring:
   profiles:
