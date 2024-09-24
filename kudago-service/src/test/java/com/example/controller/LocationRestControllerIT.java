@@ -1,40 +1,29 @@
 package com.example.controller;
 
-import com.example.BaseTest;
+import com.example.BaseIT;
 import com.example.controller.payload.CategoryPayload;
 import com.example.controller.payload.LocationPayload;
 import com.example.entity.Location;
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
-import org.junit.jupiter.api.*;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
-import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@AutoConfigureMockMvc
-@RequiredArgsConstructor
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
-public class LocationRestControllerTest extends BaseTest {
+public class LocationRestControllerIT extends BaseIT {
 
-    private final MockMvc mockMvc;
     private final String uri = "/api/v1/locations";
-
-    private static ObjectMapper objectMapper;
-
-    @BeforeAll
-    static void init() {
-        objectMapper = new ObjectMapper();
-    }
 
     @Nested
     @Tag("GetAll")
@@ -46,8 +35,9 @@ public class LocationRestControllerTest extends BaseTest {
         @DisplayName("Should return empty list when no locations exist")
         public void getAllLocations_empty() {
             var mvcResponse = mockMvc.perform(get(uri))
-                    .andExpect(status().isOk())
-                    .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                    .andExpectAll(
+                            status().isOk(),
+                            content().contentType(MediaType.APPLICATION_JSON))
                     .andReturn()
                     .getResponse();
 
@@ -65,8 +55,9 @@ public class LocationRestControllerTest extends BaseTest {
             var createdLocation = createLocation("test", "Test Location");
 
             var mvcResponse = mockMvc.perform(get(uri))
-                    .andExpect(status().isOk())
-                    .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                    .andExpectAll(
+                            status().isOk(),
+                            content().contentType(MediaType.APPLICATION_JSON))
                     .andReturn()
                     .getResponse();
 
@@ -75,8 +66,11 @@ public class LocationRestControllerTest extends BaseTest {
                     new TypeReference<List<Location>>() {
                     });
 
-            assertThat(locations).hasSize(1);
-            assertThat(locations.getFirst()).isEqualTo(createdLocation);
+            assertAll("Grouped assertions for existed location",
+                    () -> assertEquals(locations.size(), 1),
+                    () -> assertEquals(locations.getFirst(), createdLocation));
+
+            deleteLocation(createdLocation.getId());
         }
     }
 
@@ -92,13 +86,17 @@ public class LocationRestControllerTest extends BaseTest {
             var createdLocation = createLocation("test", "Test Location");
 
             var mvcResponse = mockMvc.perform(get(uri + "/" + createdLocation.getId()))
-                    .andExpect(status().isOk())
-                    .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                    .andExpectAll(
+                            status().isOk(),
+                            content().contentType(MediaType.APPLICATION_JSON))
                     .andReturn()
                     .getResponse();
 
             var actualLocation = objectMapper.readValue(mvcResponse.getContentAsString(), Location.class);
+
             assertThat(actualLocation).isEqualTo(createdLocation);
+
+            deleteLocation(createdLocation.getId());
         }
 
         @SneakyThrows
@@ -106,8 +104,9 @@ public class LocationRestControllerTest extends BaseTest {
         @DisplayName("Should return 404 when location doesn't exist")
         public void getLocationById_notFound() {
             mockMvc.perform(get(uri + "/1"))
-                    .andExpect(status().isNotFound())
-                    .andExpect(content().contentType(MediaType.APPLICATION_PROBLEM_JSON));
+                    .andExpectAll(
+                            status().isNotFound(),
+                            content().contentType(MediaType.APPLICATION_PROBLEM_JSON));
         }
     }
 
@@ -128,15 +127,19 @@ public class LocationRestControllerTest extends BaseTest {
             var mvcResponse = mockMvc.perform(post(uri)
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(payload)))
-                    .andExpect(status().isCreated())
-                    .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                    .andExpectAll(
+                            status().isCreated(),
+                            content().contentType(MediaType.APPLICATION_JSON))
                     .andReturn()
                     .getResponse();
 
             var actualLocation = objectMapper.readValue(mvcResponse.getContentAsString(), Location.class);
 
-            assertThat(actualLocation.getName()).isEqualTo(payload.name());
-            assertThat(actualLocation.getSlug()).isEqualTo(payload.slug());
+            assertAll("Grouped assertions for created location",
+                    () -> assertEquals(actualLocation.getName(), payload.name()),
+                    () -> assertEquals(actualLocation.getSlug(), payload.slug()));
+
+            deleteLocation(actualLocation.getId());
         }
 
         @SneakyThrows
@@ -150,8 +153,9 @@ public class LocationRestControllerTest extends BaseTest {
             mockMvc.perform(post(uri)
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(payload)))
-                    .andExpect(status().isBadRequest())
-                    .andExpect(content().contentType(MediaType.APPLICATION_PROBLEM_JSON));
+                    .andExpectAll(
+                            status().isBadRequest(),
+                            content().contentType(MediaType.APPLICATION_PROBLEM_JSON));
         }
     }
 
@@ -174,16 +178,21 @@ public class LocationRestControllerTest extends BaseTest {
             var mvcResponse = mockMvc.perform(put(uri + "/" + createdLocation.getId())
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(payload)))
-                    .andExpect(status().isOk())
-                    .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                    .andExpectAll(
+                            status().isOk(),
+                            content().contentType(MediaType.APPLICATION_JSON))
                     .andReturn()
                     .getResponse();
 
             var updatedLocation = objectMapper.readValue(mvcResponse.getContentAsString(), Location.class);
 
-            assertThat(updatedLocation.getId()).isEqualTo(createdLocation.getId());
-            assertThat(updatedLocation.getSlug()).isEqualTo(payload.slug());
-            assertThat(updatedLocation.getName()).isEqualTo(payload.name());
+            assertAll("Grouped assertions for updated locations",
+                    () -> assertEquals(updatedLocation.getId(), createdLocation.getId()),
+                    () -> assertEquals(updatedLocation.getSlug(), payload.slug()),
+                    () -> assertEquals(updatedLocation.getName(), payload.name())
+            );
+
+            deleteLocation(createdLocation.getId());
         }
 
         @SneakyThrows
@@ -199,8 +208,11 @@ public class LocationRestControllerTest extends BaseTest {
             mockMvc.perform(put(uri + "/" + createdLocation.getId())
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(payload)))
-                    .andExpect(status().isBadRequest())
-                    .andExpect(content().contentType(MediaType.APPLICATION_PROBLEM_JSON));
+                    .andExpectAll(
+                            status().isBadRequest(),
+                            content().contentType(MediaType.APPLICATION_PROBLEM_JSON));
+
+            deleteLocation(createdLocation.getId());
         }
 
         @SneakyThrows
@@ -215,8 +227,9 @@ public class LocationRestControllerTest extends BaseTest {
             mockMvc.perform(put(uri + "/1")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(payload)))
-                    .andExpect(status().isNotFound())
-                    .andExpect(content().contentType(MediaType.APPLICATION_PROBLEM_JSON));
+                    .andExpectAll(
+                            status().isNotFound(),
+                            content().contentType(MediaType.APPLICATION_PROBLEM_JSON));
         }
     }
 
@@ -231,8 +244,7 @@ public class LocationRestControllerTest extends BaseTest {
         public void deleteLocation_success() {
             var createdLocation = createLocation("test", "Test Name");
 
-            mockMvc.perform(delete(uri + "/" + createdLocation.getId()))
-                    .andExpect(status().isNoContent());
+           deleteLocation(createdLocation.getId());
 
             mockMvc.perform(get(uri + "/" + createdLocation.getId()))
                     .andExpect(status().isNotFound());
@@ -243,8 +255,9 @@ public class LocationRestControllerTest extends BaseTest {
         @DisplayName("Should return 404 when deleting non-existent location")
         public void deleteLocation_notFound() {
             mockMvc.perform(delete(uri + "/1"))
-                    .andExpect(status().isNotFound())
-                    .andExpect(content().contentType(MediaType.APPLICATION_PROBLEM_JSON));
+                    .andExpectAll(
+                            status().isNotFound(),
+                            content().contentType(MediaType.APPLICATION_PROBLEM_JSON));
         }
     }
 
@@ -258,11 +271,18 @@ public class LocationRestControllerTest extends BaseTest {
         var mvcResponse = mockMvc.perform(post(uri)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(payload)))
-                .andExpect(status().isCreated())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpectAll(
+                        status().isCreated(),
+                        content().contentType(MediaType.APPLICATION_JSON))
                 .andReturn()
                 .getResponse();
 
         return objectMapper.readValue(mvcResponse.getContentAsString(), Location.class);
+    }
+
+    @SneakyThrows
+    private void deleteLocation(Long id) {
+        mockMvc.perform(delete(uri + "/" + id))
+                .andExpect(status().isNoContent());
     }
 }

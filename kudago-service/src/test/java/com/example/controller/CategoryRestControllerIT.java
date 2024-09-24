@@ -1,39 +1,28 @@
 package com.example.controller;
 
-import com.example.BaseTest;
+import com.example.BaseIT;
 import com.example.controller.payload.CategoryPayload;
 import com.example.entity.Category;
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
-import org.junit.jupiter.api.*;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
-import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@AutoConfigureMockMvc
-@RequiredArgsConstructor
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
-public class CategoryRestControllerTest extends BaseTest {
+public class CategoryRestControllerIT extends BaseIT {
 
-    private final MockMvc mockMvc;
     private final String uri = "/api/v1/places/categories";
-
-    private static ObjectMapper objectMapper;
-
-    @BeforeAll
-    static void init() {
-        objectMapper = new ObjectMapper();
-    }
 
     @Nested
     @Tag("GetAll")
@@ -45,8 +34,9 @@ public class CategoryRestControllerTest extends BaseTest {
         @DisplayName("Should return empty list when no categories exist")
         public void getAllCategories_empty() {
             var mvcResponse = mockMvc.perform(get(uri))
-                    .andExpect(status().isOk())
-                    .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                    .andExpectAll(
+                            status().isOk(),
+                            content().contentType(MediaType.APPLICATION_JSON))
                     .andReturn()
                     .getResponse();
 
@@ -64,8 +54,9 @@ public class CategoryRestControllerTest extends BaseTest {
             var createdCategory = createCategory("test", "Test Category");
 
             var mvcResponse = mockMvc.perform(get(uri))
-                    .andExpect(status().isOk())
-                    .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                    .andExpectAll(
+                            status().isOk(),
+                            content().contentType(MediaType.APPLICATION_JSON))
                     .andReturn()
                     .getResponse();
 
@@ -74,8 +65,11 @@ public class CategoryRestControllerTest extends BaseTest {
                     new TypeReference<List<Category>>() {
                     });
 
-            assertThat(categories).hasSize(1);
-            assertThat(categories.getFirst()).isEqualTo(createdCategory);
+            assertAll("Grouper assertions for existed category",
+                    () -> assertEquals(categories.size(), 1),
+                    () -> assertEquals(categories.getFirst(), createdCategory));
+
+            deleteCategory(createdCategory.getId());
         }
     }
 
@@ -92,13 +86,17 @@ public class CategoryRestControllerTest extends BaseTest {
             var createdCategory = createCategory("test", "Test Category");
 
             var mvcResponse = mockMvc.perform(get(uri + "/" + createdCategory.getId()))
-                    .andExpect(status().isOk())
-                    .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                    .andExpectAll(
+                            status().isOk(),
+                            content().contentType(MediaType.APPLICATION_JSON))
                     .andReturn()
                     .getResponse();
 
             var actualCategory = objectMapper.readValue(mvcResponse.getContentAsString(), Category.class);
+
             assertThat(actualCategory).isEqualTo(createdCategory);
+
+            deleteCategory(createdCategory.getId());
         }
 
         @SneakyThrows
@@ -106,8 +104,9 @@ public class CategoryRestControllerTest extends BaseTest {
         @DisplayName("Should return 404 when category doesn't exist")
         public void getCategoryById_notFound() {
             mockMvc.perform(get(uri + "/1"))
-                    .andExpect(status().isNotFound())
-                    .andExpect(content().contentType(MediaType.APPLICATION_PROBLEM_JSON));
+                    .andExpectAll(
+                            status().isNotFound(),
+                            content().contentType(MediaType.APPLICATION_PROBLEM_JSON));
         }
     }
 
@@ -128,16 +127,19 @@ public class CategoryRestControllerTest extends BaseTest {
             var mvcResponse = mockMvc.perform(post(uri)
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(payload)))
-                    .andExpect(status().isCreated())
-                    .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                    .andExpectAll(
+                            status().isCreated(),
+                            content().contentType(MediaType.APPLICATION_JSON))
                     .andReturn()
                     .getResponse();
 
             var actualCategory = objectMapper.readValue(mvcResponse.getContentAsString(), Category.class);
 
-            assertThat(actualCategory.getId()).isEqualTo(1L);
-            assertThat(actualCategory.getSlug()).isEqualTo(payload.slug());
-            assertThat(actualCategory.getName()).isEqualTo(payload.name());
+            assertAll("Grouped assertions for created category",
+                    () -> assertEquals(actualCategory.getSlug(), payload.slug()),
+                    () -> assertEquals(actualCategory.getName(), payload.name()));
+
+            deleteCategory(actualCategory.getId());
         }
 
         @SneakyThrows
@@ -151,8 +153,9 @@ public class CategoryRestControllerTest extends BaseTest {
             mockMvc.perform(post(uri)
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(payload)))
-                    .andExpect(status().isBadRequest())
-                    .andExpect(content().contentType(MediaType.APPLICATION_PROBLEM_JSON));
+                    .andExpectAll(
+                            status().isBadRequest(),
+                            content().contentType(MediaType.APPLICATION_PROBLEM_JSON));
         }
     }
 
@@ -175,15 +178,20 @@ public class CategoryRestControllerTest extends BaseTest {
             var mvcResponse = mockMvc.perform(put(uri + "/" + createdCategory.getId())
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(payload)))
-                    .andExpect(status().isOk())
-                    .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                    .andExpectAll(
+                            status().isOk(),
+                            content().contentType(MediaType.APPLICATION_JSON))
                     .andReturn()
                     .getResponse();
 
             var updatedCategory = objectMapper.readValue(mvcResponse.getContentAsString(), Category.class);
-            assertThat(updatedCategory.getId()).isEqualTo(createdCategory.getId());
-            assertThat(updatedCategory.getSlug()).isEqualTo(payload.slug());
-            assertThat(updatedCategory.getName()).isEqualTo(payload.name());
+
+            assertAll("Grouped assertions for updated category",
+                    () -> assertEquals(updatedCategory.getId(), createdCategory.getId()),
+                    () -> assertEquals(updatedCategory.getName(), payload.name()),
+                    () -> assertEquals(updatedCategory.getSlug(), payload.slug()));
+
+            deleteCategory(createdCategory.getId());
         }
 
 
@@ -200,8 +208,11 @@ public class CategoryRestControllerTest extends BaseTest {
             mockMvc.perform(put(uri + "/" + createdCategory.getId())
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(updatePayload)))
-                    .andExpect(status().isBadRequest())
-                    .andExpect(content().contentType(MediaType.APPLICATION_PROBLEM_JSON));
+                    .andExpectAll(
+                            status().isBadRequest(),
+                            content().contentType(MediaType.APPLICATION_PROBLEM_JSON));
+
+            deleteCategory(createdCategory.getId());
         }
 
         @SneakyThrows
@@ -216,8 +227,9 @@ public class CategoryRestControllerTest extends BaseTest {
             mockMvc.perform(put(uri + "/1")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(updatePayload)))
-                    .andExpect(status().isNotFound())
-                    .andExpect(content().contentType(MediaType.APPLICATION_PROBLEM_JSON));
+                    .andExpectAll(
+                            status().isNotFound(),
+                            content().contentType(MediaType.APPLICATION_PROBLEM_JSON));
         }
     }
 
@@ -232,12 +244,12 @@ public class CategoryRestControllerTest extends BaseTest {
         public void deleteCategory_success() {
             var createdCategory = createCategory("test", "Test Category");
 
-            mockMvc.perform(delete(uri + "/" + createdCategory.getId()))
-                    .andExpect(status().isNoContent());
+            deleteCategory(createdCategory.getId());
 
             mockMvc.perform(get(uri + "/" + createdCategory.getId()))
-                    .andExpect(status().isNotFound())
-                    .andExpect(content().contentType(MediaType.APPLICATION_PROBLEM_JSON));
+                    .andExpectAll(
+                            status().isNotFound(),
+                            content().contentType(MediaType.APPLICATION_PROBLEM_JSON));
         }
 
         @SneakyThrows
@@ -245,8 +257,9 @@ public class CategoryRestControllerTest extends BaseTest {
         @DisplayName("Should return 404 when deleting non-existent category")
         public void deleteCategory_notFound() {
             mockMvc.perform(delete(uri + "/1"))
-                    .andExpect(status().isNotFound())
-                    .andExpect(content().contentType(MediaType.APPLICATION_PROBLEM_JSON));
+                    .andExpectAll(
+                            status().isNotFound(),
+                            content().contentType(MediaType.APPLICATION_PROBLEM_JSON));
         }
     }
 
@@ -260,11 +273,18 @@ public class CategoryRestControllerTest extends BaseTest {
         var mvcResponse = mockMvc.perform(post(uri)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(payload)))
-                .andExpect(status().isCreated())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpectAll(
+                        status().isCreated(),
+                        content().contentType(MediaType.APPLICATION_JSON))
                 .andReturn()
                 .getResponse();
 
         return objectMapper.readValue(mvcResponse.getContentAsString(), Category.class);
+    }
+
+    @SneakyThrows
+    private void deleteCategory(Long id) {
+        mockMvc.perform(delete(uri + "/" + id))
+                .andExpect(status().isNoContent());
     }
 }
