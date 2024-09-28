@@ -9,9 +9,14 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.http.MediaType;
 
 import java.util.List;
+import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
@@ -22,7 +27,21 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 public class CategoryRestControllerIT extends BaseIT {
 
-    private final String uri = "/api/v1/places/categories";
+    private static final String uri = "/api/v1/places/categories";
+    private static final Supplier<Stream<Arguments>> invalidCategoryPayload = () -> Stream.of(
+            Arguments.of(new CategoryPayload(null, null)),
+            Arguments.of(new CategoryPayload("", "")),
+            Arguments.of(new CategoryPayload("    ", "    ")),
+            Arguments.of(new CategoryPayload("test", null)),
+            Arguments.of(new CategoryPayload("test", "")),
+            Arguments.of(new CategoryPayload("test", "    ")),
+            Arguments.of(new CategoryPayload(null, "test")),
+            Arguments.of(new CategoryPayload("", "test")),
+            Arguments.of(new CategoryPayload("    ", "test")),
+            Arguments.of(new CategoryPayload("a".repeat(26), "test")),
+            Arguments.of(new CategoryPayload("aa", "test")),
+            Arguments.of(new CategoryPayload("test", "a".repeat(51)))
+    );
 
     @Nested
     @Tag("GetAll")
@@ -143,19 +162,20 @@ public class CategoryRestControllerIT extends BaseIT {
         }
 
         @SneakyThrows
-        @Test
+        @ParameterizedTest
         @DisplayName("Should return 400 when payload is invalid")
-        public void createCategory_badRequest() {
-            var payload = CategoryPayload.builder()
-                    .slug(" ")
-                    .build();
-
+        @MethodSource("provideInvalidCategoryPayload")
+        public void createCategory_badRequest(CategoryPayload payload) {
             mockMvc.perform(post(uri)
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(payload)))
                     .andExpectAll(
                             status().isBadRequest(),
                             content().contentType(MediaType.APPLICATION_PROBLEM_JSON));
+        }
+
+        public static Stream<Arguments> provideInvalidCategoryPayload() {
+            return invalidCategoryPayload.get();
         }
     }
 
@@ -196,14 +216,11 @@ public class CategoryRestControllerIT extends BaseIT {
 
 
         @SneakyThrows
-        @Test
+        @ParameterizedTest
         @DisplayName("Should return 400 when update payload is invalid")
-        public void updateCategory_badRequest() {
+        @MethodSource("provideInvalidCategoryPayload")
+        public void updateCategory_badRequest(CategoryPayload updatePayload) {
             var createdCategory = createCategory("old", "Old Name");
-
-            var updatePayload = CategoryPayload.builder()
-                    .slug(" ")
-                    .build();
 
             mockMvc.perform(put(uri + "/" + createdCategory.getId())
                             .contentType(MediaType.APPLICATION_JSON)
@@ -230,6 +247,10 @@ public class CategoryRestControllerIT extends BaseIT {
                     .andExpectAll(
                             status().isNotFound(),
                             content().contentType(MediaType.APPLICATION_PROBLEM_JSON));
+        }
+
+        public static Stream<Arguments> provideInvalidCategoryPayload() {
+            return invalidCategoryPayload.get();
         }
     }
 
