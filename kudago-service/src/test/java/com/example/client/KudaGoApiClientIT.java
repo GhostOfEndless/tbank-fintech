@@ -37,14 +37,14 @@ public class KudaGoApiClientIT {
 
     @Test
     @DisplayName("Should return list of all locations after fetch from API")
-    public void testFetchLocations() {
+    public void fetchLocations_notEmpty() {
         var locations = kudaGoApiClient.fetchLocations();
         assertThat(locations).isNotEmpty();
     }
 
     @Test
     @DisplayName("Should return list of all categories after fetch from API")
-    public void testFetchCategories() {
+    public void fetchCategories_notEmpty() {
         var categories = kudaGoApiClient.fetchCategories();
         assertThat(categories).isNotEmpty();
     }

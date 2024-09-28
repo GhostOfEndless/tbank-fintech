@@ -60,7 +60,7 @@ public class LocationService {
 
     public void deleteLocation(Long id) {
         if (repository.existsById(id)) {
-            repository.delete(getLocationById(id).getId());
+            repository.delete(id);
             return;
         }
         throw new NoSuchElementException("location.not_found");
