@@ -32,7 +32,7 @@ public class KudaGoApiClientIT {
 
     @DynamicPropertySource
     static void registerProperties(DynamicPropertyRegistry registry) {
-        registry.add("kudago-base-url", wiremockServer::getBaseUrl);
+        registry.add("kudago.base-url", wiremockServer::getBaseUrl);
     }
 
     @Test
