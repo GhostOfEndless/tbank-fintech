@@ -1,0 +1,287 @@
+{
+  "request": {
+    "method": "GET",
+    "url": "/place-categories/"
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "content-type": "application/json"
+    },
+    "jsonBody": [
+      {
+        "id": 123,
+        "slug": "airports",
+        "name": "Аэропорты"
+      },
+      {
+        "id": 89,
+        "slug": "amusement",
+        "name": "Развлечения"
+      },
+      {
+        "id": 114,
+        "slug": "animal-shelters",
+        "name": "Питомники"
+      },
+      {
+        "id": 17,
+        "slug": "anticafe",
+        "name": "Антикафе"
+      },
+      {
+        "id": 113,
+        "slug": "art-centers",
+        "name": "Арт-центры"
+      },
+      {
+        "id": 130,
+        "slug": "art-space",
+        "name": "Арт-пространства"
+      },
+      {
+        "id": 51,
+        "slug": "attractions",
+        "name": "Достопримечательности"
+      },
+      {
+        "id": 19,
+        "slug": "bar",
+        "name": "Бары и пабы"
+      },
+      {
+        "id": 134,
+        "slug": "brewery",
+        "name": "Пивоварня"
+      },
+      {
+        "id": 58,
+        "slug": "bridge",
+        "name": "Мосты"
+      },
+      {
+        "id": 112,
+        "slug": "business",
+        "name": "Бизнес-центры"
+      },
+      {
+        "id": 94,
+        "slug": "car-washes",
+        "name": "Автомойки"
+      },
+      {
+        "id": 97,
+        "slug": "cats",
+        "name": "Кошачий питомник"
+      },
+      {
+        "id": 63,
+        "slug": "church",
+        "name": "Церкви"
+      },
+      {
+        "id": 49,
+        "slug": "cinema",
+        "name": "Кинотеатры"
+      },
+      {
+        "id": 26,
+        "slug": "clubs",
+        "name": "Клубы"
+      },
+      {
+        "id": 135,
+        "slug": "comedy-club",
+        "name": "Камеди клаб"
+      },
+      {
+        "id": 28,
+        "slug": "concert-hall",
+        "name": "Концертные залы"
+      },
+      {
+        "id": 101,
+        "slug": "coworking",
+        "name": "Коворкинги"
+      },
+      {
+        "id": 45,
+        "slug": "culture",
+        "name": "Дома культуры"
+      },
+      {
+        "id": 124,
+        "slug": "dance-studio",
+        "name": "Танцевальные студии"
+      },
+      {
+        "id": 98,
+        "slug": "dogs",
+        "name": "Собачий питомник"
+      },
+      {
+        "id": 71,
+        "slug": "education-centers",
+        "name": "Учебные заведения"
+      },
+      {
+        "id": 57,
+        "slug": "fountain",
+        "name": "Фонтаны"
+      },
+      {
+        "id": 110,
+        "slug": "handmade",
+        "name": "HandMade"
+      },
+      {
+        "id": 69,
+        "slug": "homesteads",
+        "name": "Усадьбы"
+      },
+      {
+        "id": 104,
+        "slug": "hostels",
+        "name": "Хостелы"
+      },
+      {
+        "id": 105,
+        "slug": "inn",
+        "name": "Гостиницы и отели"
+      },
+      {
+        "id": 102,
+        "slug": "kids",
+        "name": "Детям"
+      },
+      {
+        "id": 50,
+        "slug": "library",
+        "name": "Библиотеки"
+      },
+      {
+        "id": 92,
+        "slug": "metro",
+        "name": "Метро"
+      },
+      {
+        "id": 66,
+        "slug": "monastery",
+        "name": "Монастыри"
+      },
+      {
+        "id": 42,
+        "slug": "museums",
+        "name": "Музеи и галереи"
+      },
+      {
+        "id": 46,
+        "slug": "observatory",
+        "name": "Обсерватории"
+      },
+      {
+        "id": 111,
+        "slug": "other",
+        "name": "Прочее"
+      },
+      {
+        "id": 67,
+        "slug": "palace",
+        "name": "Дворцы"
+      },
+      {
+        "id": 59,
+        "slug": "park",
+        "name": "Парки (Интересные места, Отдых)"
+      },
+      {
+        "id": 91,
+        "slug": "photo-places",
+        "name": "Фотоместа (Фотография)"
+      },
+      {
+        "id": 137,
+        "slug": "prirodnyj-zapovednik",
+        "name": "Природный заповедник"
+      },
+      {
+        "id": 139,
+        "slug": "questroom",
+        "name": "Квесты"
+      },
+      {
+        "id": 140,
+        "slug": "recreation",
+        "name": "Активный отдых"
+      },
+      {
+        "id": 15,
+        "slug": "restaurants",
+        "name": "Рестораны и кафе"
+      },
+      {
+        "id": 136,
+        "slug": "rynok",
+        "name": "Рынок"
+      },
+      {
+        "id": 90,
+        "slug": "salons",
+        "name": "Красота и здоровье"
+      },
+      {
+        "id": 108,
+        "slug": "shops",
+        "name": "Магазины"
+      },
+      {
+        "id": 53,
+        "slug": "sights",
+        "name": "Интересные места"
+      },
+      {
+        "id": 95,
+        "slug": "stable",
+        "name": "Конюшни, конные клубы"
+      },
+      {
+        "id": 93,
+        "slug": "station",
+        "name": "Вокзалы"
+      },
+      {
+        "id": 133,
+        "slug": "strip-club",
+        "name": "Стрип-клуб"
+      },
+      {
+        "id": 70,
+        "slug": "suburb",
+        "name": "Загородный отдых"
+      },
+      {
+        "id": 65,
+        "slug": "synagogue",
+        "name": "Синагоги"
+      },
+      {
+        "id": 62,
+        "slug": "temple",
+        "name": "Храмы"
+      },
+      {
+        "id": 48,
+        "slug": "theatre",
+        "name": "Театры"
+      },
+      {
+        "id": 127,
+        "slug": "workshops",
+        "name": "Мастерские"
+      }
+    ],
+    "transformers": [
+      "json-body-transformer"
+    ]
+  }
+}
