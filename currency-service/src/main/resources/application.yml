@@ -1,0 +1,23 @@
+logging:
+  level:
+    org.springframework.web.client.RestClient: debug
+server:
+  port: 8081
+
+resilience4j:
+  circuitbreaker:
+    instances:
+      cbrService:
+        slidingWindowSize: 10
+        failureRateThreshold: 50
+        waitDurationInOpenState: 5000
+        permittedNumberOfCallsInHalfOpenState: 3
+        minimumNumberOfCalls: 5
+  retry:
+    instances:
+      cbrService:
+        maxAttempts: 3
+        waitDuration: 1000
+
+cbr:
+  url: https://www.cbr.ru/scripts/XML_daily.asp
