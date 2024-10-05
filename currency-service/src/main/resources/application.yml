@@ -1,6 +1,3 @@
-logging:
-  level:
-    org.springframework.web.client.RestClient: debug
 server:
   port: 8081
 
@@ -21,3 +18,9 @@ resilience4j:
 
 cbr:
   url: https://www.cbr.ru/scripts/XML_daily.asp
+
+spring:
+  cache:
+    type: caffeine
+    caffeine:
+      spec: expireAfterWrite=3600s
