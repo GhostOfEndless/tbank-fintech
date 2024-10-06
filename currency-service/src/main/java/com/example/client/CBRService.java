@@ -31,12 +31,11 @@ public class CBRService {
                 .uri("/XML_daily.asp")
                 .retrieve()
                 .toEntity(ValCurs.class);
-
         if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
             response.getBody().getValutes().add(getRUBCurs());
         }
 
-        log.debug("Response from CBR: {}", response);
+        log.info("Response from CBR: {}", response);
 
         return Optional.ofNullable(response.getBody());
     }
@@ -54,7 +53,7 @@ public class CBRService {
             response.getBody().getItems().add(getRUB());
         }
 
-        log.debug("Response from CBR: {}", response);
+        log.info("Response from CBR: {}", response);
 
         return Optional.ofNullable(response.getBody());
     }

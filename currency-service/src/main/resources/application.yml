@@ -10,6 +10,9 @@ spring:
     caffeine:
       spec: expireAfterWrite=3600s
 
+  profiles:
+    active: prod
+
 resilience4j:
   circuitbreaker:
     configs:

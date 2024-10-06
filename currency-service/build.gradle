@@ -30,6 +30,7 @@ dependencies {
 
     // test
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.wiremock:wiremock-standalone:3.9.1'
 }
 
 test {
@@ -50,7 +51,9 @@ jacocoTestReport {
     afterEvaluate {
         classDirectories.setFrom(files(classDirectories.files.collect {
             fileTree(dir: it, exclude: [
-                    "com/example/entity/"
+                    "com/example/entity/",
+                    "com/example/dto/",
+                    "com/example/payload/"
             ])
         }))
     }
