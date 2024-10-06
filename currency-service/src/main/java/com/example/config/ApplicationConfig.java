@@ -11,12 +11,18 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.converter.xml.MappingJackson2XmlHttpMessageConverter;
+import org.springframework.validation.beanvalidation.MethodValidationPostProcessor;
 import org.springframework.web.client.RestClient;
 
 import java.io.IOException;
 
 @Configuration
 public class ApplicationConfig {
+
+    @Bean
+    public Integer retryDelay(@Value("${service.retry-delay}") Integer retryDelay) {
+        return retryDelay;
+    }
 
     @Bean
     public RestClient restClient(@Value("${cbr.base-url}") String url) {
@@ -43,5 +49,10 @@ public class ApplicationConfig {
                 .build();
 
         return new MappingJackson2XmlHttpMessageConverter(mapper);
+    }
+
+    @Bean
+    public MethodValidationPostProcessor methodValidationPostProcessor() {
+        return new MethodValidationPostProcessor();
     }
 }

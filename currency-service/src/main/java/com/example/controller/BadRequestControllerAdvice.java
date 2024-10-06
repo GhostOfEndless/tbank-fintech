@@ -3,8 +3,10 @@ package com.example.controller;
 import com.example.exception.CurrencyNotFoundException;
 import com.example.exception.InvalidCurrencyCodeException;
 import com.example.exception.ServiceUnavailableException;
+import jakarta.validation.ConstraintViolationException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.MessageSource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
@@ -20,6 +22,7 @@ import java.util.Objects;
 @RequiredArgsConstructor
 public class BadRequestControllerAdvice {
 
+    private final Integer retryDelay;
     private final MessageSource messageSource;
 
     @ExceptionHandler(BindException.class)
@@ -31,6 +34,26 @@ public class BadRequestControllerAdvice {
         problemDetail.setProperty("errors",
                 exception.getAllErrors().stream()
                         .map(ObjectError::getDefaultMessage)
+                        .toList());
+
+        return ResponseEntity.badRequest()
+                .body(problemDetail);
+    }
+
+    @ExceptionHandler(ConstraintViolationException.class)
+    public ResponseEntity<ProblemDetail> handleConstraintViolationException(
+            ConstraintViolationException exception, Locale locale) {
+
+        var problemDetail = ProblemDetail
+                .forStatusAndDetail(HttpStatus.BAD_REQUEST,
+                        messageSource.getMessage("errors.400.title", new Object[0],
+                                "errors.400.title", locale));
+        problemDetail.setProperty("errors",
+                exception.getConstraintViolations().stream()
+                        .map(violation ->
+                                messageSource.getMessage(violation.getMessage(), new Object[0],
+                                        violation.getMessage(), locale)
+                        )
                         .toList());
 
         return ResponseEntity.badRequest()
@@ -60,7 +83,8 @@ public class BadRequestControllerAdvice {
     @ExceptionHandler(ServiceUnavailableException.class)
     public ResponseEntity<ProblemDetail> handleServiceUnavailableException(ServiceUnavailableException exception,
                                                                            Locale locale) {
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
+                .header(HttpHeaders.RETRY_AFTER, String.valueOf(retryDelay))
                 .body(ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST,
                         messageSource.getMessage(exception.getMessage(), new Object[0],
                                 exception.getMessage(), locale)));

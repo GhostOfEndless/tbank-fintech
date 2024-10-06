@@ -1,21 +1,6 @@
 server:
   port: 8081
 
-resilience4j:
-  circuitbreaker:
-    instances:
-      cbrService:
-        slidingWindowSize: 10
-        failureRateThreshold: 50
-        waitDurationInOpenState: 5000
-        permittedNumberOfCallsInHalfOpenState: 3
-        minimumNumberOfCalls: 5
-  retry:
-    instances:
-      cbrService:
-        maxAttempts: 3
-        waitDuration: 1000
-
 cbr:
   base-url: https://cbr.ru/scripts
 
@@ -24,3 +9,32 @@ spring:
     type: caffeine
     caffeine:
       spec: expireAfterWrite=3600s
+
+resilience4j:
+  circuitbreaker:
+    configs:
+      default:
+        register-health-indicator: true
+        sliding-window-size: 10
+        minimum-number-of-calls: 5
+        permitted-number-of-calls-in-half-open-state: 3
+        automatic-transition-from-open-to-half-open-enabled: true
+        wait-duration-in-open-state:
+          seconds: 5
+        failure-rate-threshold: 50
+        event-consumer-buffer-size: 10
+    instances:
+      cbr-client:
+        base-config: default
+  retry:
+    configs:
+      default:
+        max-attempts: 3
+        wait-duration:
+          seconds: 5
+    instances:
+      cbr-client:
+        base-config: default
+
+service:
+  retry-delay: 3600 # in seconds

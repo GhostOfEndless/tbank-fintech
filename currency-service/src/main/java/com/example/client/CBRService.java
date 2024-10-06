@@ -4,6 +4,8 @@ import com.example.entity.Item;
 import com.example.entity.ValCurs;
 import com.example.entity.Valuta;
 import com.example.entity.Valute;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+import io.github.resilience4j.retry.annotation.Retry;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.Cacheable;
@@ -22,6 +24,8 @@ public class CBRService {
     private final RestClient restClient;
 
     @Cacheable("val-curs")
+    @Retry(name = "cbr-client")
+    @CircuitBreaker(name = "cbr-client", fallbackMethod = "getValCursFallback")
     public Optional<ValCurs> getValCurs() {
         var response = restClient.get()
                 .uri("/XML_daily.asp")
@@ -32,12 +36,14 @@ public class CBRService {
             response.getBody().getValutes().add(getRUBCurs());
         }
 
-        log.info(response.toString());
+        log.debug("Response from CBR: {}", response);
 
         return Optional.ofNullable(response.getBody());
     }
 
     @Cacheable("valuta")
+    @Retry(name = "cbr-client")
+    @CircuitBreaker(name = "cbr-client", fallbackMethod = "getValutaFallback")
     public Optional<Valuta> getValuta() {
         var response = restClient.get()
                 .uri("/XML_valFull.asp")
@@ -48,9 +54,21 @@ public class CBRService {
             response.getBody().getItems().add(getRUB());
         }
 
-        log.info(response.toString());
+        log.debug("Response from CBR: {}", response);
 
         return Optional.ofNullable(response.getBody());
+    }
+
+    @SuppressWarnings("unused")
+    private Optional<ValCurs> getValCursFallback(Exception e) {
+        log.error("Circuit breaker fallback for getValCurs. Error: {}", e.getMessage());
+        return Optional.empty();
+    }
+
+    @SuppressWarnings("unused")
+    private Optional<Valuta> getValutaFallback(Exception e) {
+        log.error("Circuit breaker fallback for getValuta. Error: {}", e.getMessage());
+        return Optional.empty();
     }
 
     private Item getRUB() {
