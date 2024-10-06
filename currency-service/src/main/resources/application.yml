@@ -17,7 +17,7 @@ resilience4j:
         waitDuration: 1000
 
 cbr:
-  url: https://www.cbr.ru/scripts/XML_daily.asp
+  base-url: https://cbr.ru/scripts
 
 spring:
   cache:

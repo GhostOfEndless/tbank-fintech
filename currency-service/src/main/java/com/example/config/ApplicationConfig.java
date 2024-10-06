@@ -19,7 +19,7 @@ import java.io.IOException;
 public class ApplicationConfig {
 
     @Bean
-    public RestClient restClient(@Value("${cbr.url}") String url) {
+    public RestClient restClient(@Value("${cbr.base-url}") String url) {
         return RestClient.builder()
                 .baseUrl(url)
                 .defaultHeader("Accept", "application/xml")

@@ -12,26 +12,26 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class Valute {
+public class Item {
 
     @JacksonXmlProperty(localName = "ID", isAttribute = true)
     private String id;
 
-    @JacksonXmlProperty(localName = "NumCode")
-    private Integer numCode;
+    @JacksonXmlProperty(localName = "Name")
+    private String name;
 
-    @JacksonXmlProperty(localName = "CharCode")
-    private String charCode;
+    @JacksonXmlProperty(localName = "EngName")
+    private String engName;
 
     @JacksonXmlProperty(localName = "Nominal")
     private Integer nominal;
 
-    @JacksonXmlProperty(localName = "Name")
-    private String name;
+    @JacksonXmlProperty(localName = "ParentCode")
+    private String parentCode;
 
-    @JacksonXmlProperty(localName = "Value")
-    private Float value;
+    @JacksonXmlProperty(localName = "ISO_Num_Code")
+    private Integer isoNumCode;
 
-    @JacksonXmlProperty(localName = "VunitRate")
-    private Float vunitRate;
+    @JacksonXmlProperty(localName = "ISO_Char_Code")
+    private String isoCharCode;
 }

@@ -16,7 +16,12 @@ public class DataLoader {
 
     @EventListener(ContextRefreshedEvent.class)
     public void onApplicationEvent() {
-        var response = cbrService.getCurrencies();
-        log.info("Response is: {}", response);
+        cbrService.getValCurs().ifPresentOrElse(
+                valCurs -> log.info("Loaded '{}' valute curse entries", valCurs.getValutes().size()),
+                () -> log.warn("Error occurred while loading valute curse entries!"));
+
+        cbrService.getValuta().ifPresentOrElse(
+                valCurs -> log.info("Loaded '{}' valute symbols", valCurs.getItems().size()),
+                () -> log.warn("Error occurred while loading valute symbols!"));
     }
 }

@@ -1,5 +1,8 @@
 package com.example.controller;
 
+import com.example.exception.CurrencyNotFoundException;
+import com.example.exception.InvalidCurrencyCodeException;
+import com.example.exception.ServiceUnavailableException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.MessageSource;
 import org.springframework.http.HttpStatus;
@@ -11,6 +14,7 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
 import java.util.Locale;
+import java.util.Objects;
 
 @ControllerAdvice
 @RequiredArgsConstructor
@@ -31,5 +35,34 @@ public class BadRequestControllerAdvice {
 
         return ResponseEntity.badRequest()
                 .body(problemDetail);
+    }
+
+    @ExceptionHandler(CurrencyNotFoundException.class)
+    public ResponseEntity<ProblemDetail> handleCurrencyNotFoundException(CurrencyNotFoundException exception,
+                                                                         Locale locale) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND,
+                        Objects.requireNonNull(messageSource.getMessage(exception.getMessage(), new Object[0],
+                                        exception.getMessage(), locale))
+                                .replace("{code}", exception.getCurrencyCode())));
+    }
+
+    @ExceptionHandler(InvalidCurrencyCodeException.class)
+    public ResponseEntity<ProblemDetail> handleInvalidCurrencyCodeException(InvalidCurrencyCodeException exception,
+                                                                            Locale locale) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST,
+                        Objects.requireNonNull(messageSource.getMessage(exception.getMessage(), new Object[0],
+                                        exception.getMessage(), locale))
+                                .replace("{code}", exception.getCurrencyCode())));
+    }
+
+    @ExceptionHandler(ServiceUnavailableException.class)
+    public ResponseEntity<ProblemDetail> handleServiceUnavailableException(ServiceUnavailableException exception,
+                                                                           Locale locale) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST,
+                        messageSource.getMessage(exception.getMessage(), new Object[0],
+                                exception.getMessage(), locale)));
     }
 }

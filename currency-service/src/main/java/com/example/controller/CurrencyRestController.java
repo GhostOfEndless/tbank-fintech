@@ -4,6 +4,7 @@ import com.example.controller.dto.ConvertCurrencyDTO;
 import com.example.controller.dto.CurrencyRateDTO;
 import com.example.controller.payload.ConvertCurrencyPayload;
 import com.example.service.CurrencyService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -24,7 +25,14 @@ public class CurrencyRestController {
     }
 
     @PostMapping("/convert")
-    public ConvertCurrencyDTO convertCurrency(@RequestBody ConvertCurrencyPayload payload) {
-        return ConvertCurrencyDTO.builder().build();
+    public ConvertCurrencyDTO convertCurrency(@Valid @RequestBody ConvertCurrencyPayload payload) {
+        var convertedAmount = currencyService.convertToCurrency(payload.fromCurrency(),
+                payload.toCurrency(), payload.amount());
+
+        return ConvertCurrencyDTO.builder()
+                .fromCurrency(payload.fromCurrency())
+                .toCurrency(payload.toCurrency())
+                .convertedAmount(convertedAmount)
+                .build();
     }
 }
