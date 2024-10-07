@@ -1,5 +1,13 @@
 <?xml version="1.0" encoding="windows-1251"?>
 <Valuta name="Foreign Currency Market Lib">
+    <Item ID="R01000">
+        <Name>Российский рубль</Name>
+        <EngName>Russian ruble</EngName>
+        <Nominal>1</Nominal>
+        <ParentCode>R01000</ParentCode>
+        <ISO_Num_Code>100</ISO_Num_Code>
+        <ISO_Char_Code>RUB</ISO_Char_Code>
+    </Item>
     <Item ID="R01010">
         <Name>Австралийский доллар</Name>
         <EngName>Australian Dollar</EngName>

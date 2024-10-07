@@ -85,7 +85,7 @@ public class BadRequestControllerAdvice {
                                                                            Locale locale) {
         return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
                 .header(HttpHeaders.RETRY_AFTER, String.valueOf(retryDelay))
-                .body(ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST,
+                .body(ProblemDetail.forStatusAndDetail(HttpStatus.SERVICE_UNAVAILABLE,
                         messageSource.getMessage(exception.getMessage(), new Object[0],
                                 exception.getMessage(), locale)));
     }

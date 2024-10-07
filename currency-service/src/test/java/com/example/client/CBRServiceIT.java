@@ -1,5 +1,6 @@
 package com.example.client;
 
+import com.example.Application;
 import com.github.tomakehurst.wiremock.http.Fault;
 import com.github.tomakehurst.wiremock.junit5.WireMockExtension;
 import lombok.extern.slf4j.Slf4j;
@@ -12,6 +13,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
+import org.springframework.test.context.TestPropertySource;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;
@@ -19,7 +21,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @Slf4j
 @ActiveProfiles("test")
-@SpringBootTest
+@SpringBootTest(classes = Application.class)
+@TestPropertySource(properties = {
+        "spring.cache.type=none"
+})
 public class CBRServiceIT {
 
     @RegisterExtension
@@ -55,7 +60,7 @@ public class CBRServiceIT {
                 .isPresent()
                 .hasValueSatisfying(valCurs -> assertThat(valCurs.getValutes())
                         .isNotEmpty()
-                        .hasSize(44)
+                        .hasSize(45)
                         .filteredOn(v -> "USD".equals(v.getCharCode()))
                         .singleElement()
                         .isNotNull());
@@ -99,7 +104,7 @@ public class CBRServiceIT {
                 .hasValueSatisfying(valuta ->
                         assertThat(valuta.getItems())
                                 .isNotEmpty()
-                                .hasSize(71)
+                                .hasSize(72)
                                 .filteredOn(i -> "USD".equals(i.getIsoCharCode()))
                                 .singleElement()
                                 .isNotNull());

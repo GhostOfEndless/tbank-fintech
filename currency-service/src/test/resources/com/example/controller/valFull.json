@@ -1,0 +1,13 @@
+{
+  "request": {
+    "method": "GET",
+    "url": "/XML_valFull.asp"
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "content-type": "application/xml"
+    },
+    "bodyFileName": "XML_valFull.xml"
+  }
+}
