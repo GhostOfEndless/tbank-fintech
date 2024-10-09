@@ -12,13 +12,13 @@ import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindException;
 import org.springframework.validation.ObjectError;
-import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.util.Locale;
 import java.util.Objects;
 
-@ControllerAdvice
+@RestControllerAdvice
 @RequiredArgsConstructor
 public class BadRequestControllerAdvice {
 

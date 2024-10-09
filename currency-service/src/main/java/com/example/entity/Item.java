@@ -1,7 +1,6 @@
 package com.example.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -11,27 +10,26 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@JsonIgnoreProperties(ignoreUnknown = true)
 public class Item {
 
-    @JacksonXmlProperty(localName = "ID", isAttribute = true)
+    @JsonProperty("ID")
     private String id;
 
-    @JacksonXmlProperty(localName = "Name")
+    @JsonProperty("Name")
     private String name;
 
-    @JacksonXmlProperty(localName = "EngName")
+    @JsonProperty("EngName")
     private String engName;
 
-    @JacksonXmlProperty(localName = "Nominal")
+    @JsonProperty("Nominal")
     private Integer nominal;
 
-    @JacksonXmlProperty(localName = "ParentCode")
+    @JsonProperty("ParentCode")
     private String parentCode;
 
-    @JacksonXmlProperty(localName = "ISO_Num_Code")
+    @JsonProperty("ISO_Num_Code")
     private Integer isoNumCode;
 
-    @JacksonXmlProperty(localName = "ISO_Char_Code")
+    @JsonProperty("ISO_Char_Code")
     private String isoCharCode;
 }
