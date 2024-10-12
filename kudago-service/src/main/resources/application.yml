@@ -14,3 +14,7 @@ kudago:
 spring:
   profiles:
     active: prod
+
+data-loading:
+  threads: 2
+  interval: 3600 # in seconds

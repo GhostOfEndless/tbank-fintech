@@ -42,6 +42,7 @@ public class KudaGoApiClient {
     }
 
     private <T> List<T> fetchData(String uri, Class<T[]> responseType) {
+        log.debug("Start request");
         ResponseEntity<T[]> response = restClient.get()
                 .uri(uri)
                 .retrieve()

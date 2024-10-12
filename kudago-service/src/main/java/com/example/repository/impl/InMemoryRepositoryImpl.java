@@ -49,4 +49,10 @@ public class InMemoryRepositoryImpl<V extends AbstractEntity> implements InMemor
     public boolean existsById(Long id) {
         return storage.containsKey(id);
     }
+
+    @Override
+    public void deleteAll() {
+        storage.clear();
+        idCounter.set(0);
+    }
 }

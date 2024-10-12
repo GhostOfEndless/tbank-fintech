@@ -19,6 +19,7 @@ public class CategoryService {
     private final KudaGoApiClient kudaGoApiClient;
 
     public void init() {
+        repository.deleteAll();
         log.info("Fetching categories from API...");
         kudaGoApiClient.fetchCategories()
                 .forEach(payload -> repository.save(
