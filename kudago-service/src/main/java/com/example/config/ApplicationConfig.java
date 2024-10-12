@@ -4,7 +4,7 @@ import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.web.client.RestClient;
+import org.springframework.web.reactive.function.client.WebClient;
 
 import java.time.Duration;
 import java.util.concurrent.ExecutorService;
@@ -15,13 +15,8 @@ import java.util.concurrent.ScheduledExecutorService;
 public class ApplicationConfig {
 
     @Bean
-    public String kudaGoBaseUrl(@Value("${kudago.base-url}") String uri) {
-        return uri;
-    }
-
-    @Bean
-    public RestClient categoriesRestClient() {
-        return RestClient.create();
+    public WebClient categoriesRestClient(@Value("${kudago.base-url}") String uri) {
+        return WebClient.create(uri);
     }
 
     @Bean

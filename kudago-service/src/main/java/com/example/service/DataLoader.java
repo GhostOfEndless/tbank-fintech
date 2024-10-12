@@ -40,6 +40,7 @@ public class DataLoader {
 
         log.debug("Starting tasks for data loading");
         var startTime = System.currentTimeMillis();
+
         dataLoaderThreadPool.submit(() -> {
             categoryService.init();
             latch.countDown();

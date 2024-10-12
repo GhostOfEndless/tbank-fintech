@@ -4,13 +4,16 @@ import com.example.controller.payload.CategoryPayload;
 import com.example.controller.payload.LocationPayload;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.ResponseEntity;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.EnableRetry;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.RestClient;
+import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Mono;
+import reactor.util.retry.Retry;
 
+import java.lang.reflect.Array;
+import java.time.Duration;
 import java.util.Arrays;
 import java.util.List;
 
@@ -20,8 +23,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class KudaGoApiClient {
 
-    private final RestClient restClient;
-    private final String kudaGoBaseUrl;
+    private final WebClient webClient;
 
     @Retryable(
             maxAttemptsExpression = "${kudago.max-retries}",
@@ -29,7 +31,7 @@ public class KudaGoApiClient {
             retryFor = {RuntimeException.class}
     )
     public List<CategoryPayload> fetchCategories() {
-        return fetchData(kudaGoBaseUrl + "/place-categories/", CategoryPayload[].class);
+        return fetchData("/place-categories/", CategoryPayload[].class);
     }
 
     @Retryable(
@@ -38,27 +40,27 @@ public class KudaGoApiClient {
             retryFor = {RuntimeException.class}
     )
     public List<LocationPayload> fetchLocations() {
-        return fetchData(kudaGoBaseUrl + "/locations/", LocationPayload[].class);
+        return fetchData("/locations/", LocationPayload[].class);
     }
 
     private <T> List<T> fetchData(String uri, Class<T[]> responseType) {
         log.debug("Start request");
-        ResponseEntity<T[]> response = restClient.get()
+        var response = webClient.get()
                 .uri(uri)
                 .retrieve()
-                .toEntity(responseType);
+                .bodyToMono(responseType)
+                .retryWhen(Retry.fixedDelay(3, Duration.ofMillis(1000)))
+                .doOnError(error -> log.error("An error has occurred {}", error.getMessage()))
+                .onErrorResume(error -> Mono.just(responseType.cast( // return empty array
+                        Array.newInstance(responseType.getComponentType(), 0))))
+                .block();
 
-        var body = response.getBody();
-
-        if (body == null) {
+        if (response == null) {
             log.error("Received null response for URI: {}", uri);
-            throw new RuntimeException();
-        } else if (!response.getStatusCode().is2xxSuccessful()) {
-            log.error("Unexpected HTTP status code '{}' for URI: {}", response.getStatusCode(), uri);
             throw new RuntimeException();
         }
 
-        log.debug("Successfully fetched '{}' entries from '{}'", body.length, uri);
-        return Arrays.asList(body);
+        log.debug("Successfully fetched '{}' entries from '{}'", response.length, uri);
+        return Arrays.asList(response);
     }
 }
