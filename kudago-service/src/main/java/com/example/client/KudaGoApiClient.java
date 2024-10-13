@@ -2,20 +2,27 @@ package com.example.client;
 
 import com.example.controller.payload.CategoryPayload;
 import com.example.controller.payload.LocationPayload;
+import com.example.entity.Event;
+import com.example.entity.EventsResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.EnableRetry;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.util.retry.Retry;
 
 import java.lang.reflect.Array;
 import java.time.Duration;
+import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 @Slf4j
 @Component
@@ -23,7 +30,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class KudaGoApiClient {
 
-    private final WebClient webClient;
+    private final WebClient kudaGoWebClient;
 
     @Retryable(
             maxAttemptsExpression = "${kudago.max-retries}",
@@ -43,9 +50,21 @@ public class KudaGoApiClient {
         return fetchData("/locations/", LocationPayload[].class);
     }
 
-    private <T> List<T> fetchData(String uri, Class<T[]> responseType) {
+    public List<Event> getEventsParallel(LocalDate dateFrom, LocalDate dateTo, Float budget) {
+        return Flux.range(1, Integer.MAX_VALUE)
+                .concatMap(page -> getEventsForPage(dateFrom, dateTo, page))
+                .takeWhile(eventsResponse -> !Objects.isNull(eventsResponse.getResults()))
+                .flatMapIterable(eventsResponse -> eventsResponse.getResults()
+                        .stream()
+                        .filter(event -> event.isFitsBudget(budget))
+                        .toList())
+                .collectList()
+                .block();
+    }
+
+    private @NotNull <T> List<T> fetchData(String uri, Class<T[]> responseType) {
         log.debug("Start request");
-        var response = webClient.get()
+        var response = kudaGoWebClient.get()
                 .uri(uri)
                 .retrieve()
                 .bodyToMono(responseType)
@@ -62,5 +81,23 @@ public class KudaGoApiClient {
 
         log.debug("Successfully fetched '{}' entries from '{}'", response.length, uri);
         return Arrays.asList(response);
+    }
+
+    private Mono<EventsResponse> getEventsForPage(LocalDate dateFrom, LocalDate dateTo, int page) {
+        return kudaGoWebClient.get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/events/")
+                        .queryParam("actual_since", dateFrom.toString())
+                        .queryParam("actual_until", dateTo.toString())
+                        .queryParam("page", page)
+                        .queryParam("order_by", "is_free,price")
+                        .queryParam("text_format", "text")
+                        .queryParam("location", "msk")
+                        .queryParam("fields", "id,title,price,is_free")
+                        .build())
+                .retrieve()
+                .bodyToMono(EventsResponse.class)
+                .onErrorResume(WebClientResponseException.NotFound.class,
+                        error -> Mono.just(new EventsResponse()));
     }
 }

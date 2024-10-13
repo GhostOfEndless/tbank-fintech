@@ -15,7 +15,12 @@ import java.util.concurrent.ScheduledExecutorService;
 public class ApplicationConfig {
 
     @Bean
-    public WebClient categoriesRestClient(@Value("${kudago.base-url}") String uri) {
+    public WebClient kudaGoWebClient(@Value("${kudago.base-url}") String uri) {
+        return WebClient.create(uri);
+    }
+
+    @Bean
+    public WebClient currencyWebClient(@Value("${currency-service.base-url}") String uri) {
         return WebClient.create(uri);
     }
 
