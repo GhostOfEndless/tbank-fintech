@@ -11,8 +11,10 @@ import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.core.publisher.Mono;
-import java.util.Objects;
+
+import java.util.concurrent.CompletableFuture;
 
 @Slf4j
 @Component
@@ -21,24 +23,42 @@ public class CurrencyServiceApiClient {
 
     private final WebClient currencyWebClient;
 
-    public Float convertBudgetToRubles(@NotNull Float budget, @NotNull String currency) {
-        var convertRequestBody = ConvertCurrencyRequest.builder()
-                .toCurrency("RUB")
-                .fromCurrency(currency.toUpperCase())
-                .amount(budget)
-                .build();
-
-        var response = currencyWebClient.post()
+    public Mono<Float> convertBudgetToRublesReactive(@NotNull Float budget, @NotNull String currency) {
+        return currencyWebClient.post()
                 .uri("/convert")
-                .body(BodyInserters.fromValue(convertRequestBody))
+                .body(BodyInserters.fromValue(
+                        makeConvertRequest(budget, currency)))
                 .retrieve()
                 .onStatus(HttpStatusCode::is4xxClientError, error ->
                         Mono.error(new InvalidCurrencyException(currency)))
                 .onStatus(HttpStatusCode::is5xxServerError, error ->
                         Mono.error(new CurrencyServiceUnavailableException()))
                 .bodyToMono(ConvertCurrencyResponse.class)
-                .block();
+                .map(ConvertCurrencyResponse::convertedAmount);
+    }
 
-        return Objects.requireNonNull(response).convertedAmount();
+    public CompletableFuture<Float> convertBudgetToRublesFuture(@NotNull Float budget, @NotNull String currency) {
+        return currencyWebClient.post()
+                .uri("/convert")
+                .body(BodyInserters.fromValue(
+                        makeConvertRequest(budget, currency)))
+                .retrieve()
+                .bodyToMono(ConvertCurrencyResponse.class)
+                .map(ConvertCurrencyResponse::convertedAmount)
+                .toFuture()
+                .exceptionally(throwable -> {
+                    if (throwable.getCause() instanceof WebClientResponseException.BadRequest) {
+                        throw new InvalidCurrencyException(currency);
+                    }
+                    throw new CurrencyServiceUnavailableException();
+                });
+    }
+
+    private ConvertCurrencyRequest makeConvertRequest(@NotNull Float budget, @NotNull String currency) {
+        return ConvertCurrencyRequest.builder()
+                .toCurrency("RUB")
+                .fromCurrency(currency.toUpperCase())
+                .amount(budget)
+                .build();
     }
 }
