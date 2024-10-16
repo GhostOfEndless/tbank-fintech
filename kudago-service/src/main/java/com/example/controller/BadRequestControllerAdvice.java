@@ -1,9 +1,9 @@
 package com.example.controller;
 
 import com.example.aspect.LogExecutionTime;
-import com.example.exception.CurrencyServiceUnavailableException;
 import com.example.exception.DateBoundsException;
 import com.example.exception.InvalidCurrencyException;
+import com.example.exception.ServiceUnavailableException;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
 import lombok.RequiredArgsConstructor;
@@ -17,6 +17,7 @@ import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import java.util.Locale;
 import java.util.Objects;
@@ -101,15 +102,15 @@ public class BadRequestControllerAdvice {
                                 "errors.400.title", locale));
 
         problemDetail.setProperty("error", Objects.requireNonNull(
-                        messageSource.getMessage(exception.getMessage(), new Object[0],
-                                exception.getMessage(), locale)).formatted(exception.getCurrency()));
+                messageSource.getMessage(exception.getMessage(), new Object[0],
+                        exception.getMessage(), locale)).formatted(exception.getCurrency()));
 
         return ResponseEntity.badRequest()
                 .body(problemDetail);
     }
 
-    @ExceptionHandler(CurrencyServiceUnavailableException.class)
-    public ResponseEntity<ProblemDetail> handleInvalidCurrencyException(CurrencyServiceUnavailableException exception,
+    @ExceptionHandler(ServiceUnavailableException.class)
+    public ResponseEntity<ProblemDetail> handleInvalidCurrencyException(ServiceUnavailableException exception,
                                                                         Locale locale) {
         var problemDetail = ProblemDetail
                 .forStatusAndDetail(HttpStatus.SERVICE_UNAVAILABLE,
@@ -117,10 +118,27 @@ public class BadRequestControllerAdvice {
                                 "errors.503.title", locale));
 
         problemDetail.setProperty("error", messageSource.getMessage(exception.getMessage(), new Object[0],
-                        exception.getMessage(), locale));
+                exception.getMessage(), locale));
 
         return ResponseEntity
                 .status(HttpStatus.SERVICE_UNAVAILABLE)
+                .body(problemDetail);
+    }
+
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<ProblemDetail> handleMethodArgumentTypeMismatchException(
+            MethodArgumentTypeMismatchException exception,
+            Locale locale) {
+        var problemDetail = ProblemDetail
+                .forStatusAndDetail(HttpStatus.BAD_REQUEST,
+                        messageSource.getMessage("errors.400.title", new Object[0],
+                                "errors.400.title", locale));
+
+        problemDetail.setProperty("error", messageSource.getMessage(exception.getMessage(), new Object[0],
+                exception.getMessage(), locale));
+
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
                 .body(problemDetail);
     }
 }

@@ -28,7 +28,7 @@ public class EventService {
     private final CurrencyServiceApiClient currencyApiClient;
 
     public Mono<List<Event>> getEventsReactive(@NotNull Float budget, @NotNull String currencyCode,
-                                       LocalDate dateFrom, LocalDate dateTo) {
+                                               LocalDate dateFrom, LocalDate dateTo) {
         var dateBounds = getDateBounds(dateFrom, dateTo);
 
         return Mono.zip(
@@ -46,7 +46,7 @@ public class EventService {
 
     @Async("asyncExecutor")
     public CompletableFuture<List<Event>> getEventsFuture(@NotNull Float budget, @NotNull String currencyCode,
-                                                    LocalDate dateFrom, LocalDate dateTo) {
+                                                          LocalDate dateFrom, LocalDate dateTo) {
         var dateBounds = getDateBounds(dateFrom, dateTo);
         var convertedBudgetFuture = currencyApiClient.convertBudgetToRublesFuture(budget, currencyCode);
         var eventsFuture = kudaGoApiClient.getEventsFuture(dateBounds.from(), dateBounds.to());
@@ -80,5 +80,6 @@ public class EventService {
     record DateBounds(
             LocalDate from,
             LocalDate to
-    ) {}
+    ) {
+    }
 }

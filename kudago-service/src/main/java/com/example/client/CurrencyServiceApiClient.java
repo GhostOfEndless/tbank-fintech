@@ -2,7 +2,7 @@ package com.example.client;
 
 import com.example.client.dto.ConvertCurrencyRequest;
 import com.example.client.dto.ConvertCurrencyResponse;
-import com.example.exception.CurrencyServiceUnavailableException;
+import com.example.exception.ServiceUnavailableException;
 import com.example.exception.InvalidCurrencyException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -11,6 +11,7 @@ import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.reactive.function.client.WebClientRequestException;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.core.publisher.Mono;
 
@@ -32,8 +33,10 @@ public class CurrencyServiceApiClient {
                 .onStatus(HttpStatusCode::is4xxClientError, error ->
                         Mono.error(new InvalidCurrencyException(currency)))
                 .onStatus(HttpStatusCode::is5xxServerError, error ->
-                        Mono.error(new CurrencyServiceUnavailableException()))
+                        Mono.error(new ServiceUnavailableException()))
                 .bodyToMono(ConvertCurrencyResponse.class)
+                .onErrorResume(WebClientRequestException.class,
+                        error -> Mono.error(new ServiceUnavailableException()))
                 .map(ConvertCurrencyResponse::convertedAmount);
     }
 
@@ -50,7 +53,7 @@ public class CurrencyServiceApiClient {
                     if (throwable.getCause() instanceof WebClientResponseException.BadRequest) {
                         throw new InvalidCurrencyException(currency);
                     }
-                    throw new CurrencyServiceUnavailableException();
+                    throw new ServiceUnavailableException();
                 });
     }
 

@@ -4,6 +4,7 @@ import com.example.controller.payload.CategoryPayload;
 import com.example.controller.payload.LocationPayload;
 import com.example.entity.Event;
 import com.example.entity.EventsResponse;
+import com.example.exception.ServiceUnavailableException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
@@ -12,6 +13,7 @@ import org.springframework.retry.annotation.EnableRetry;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.reactive.function.client.WebClientRequestException;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -23,6 +25,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 
 @Slf4j
@@ -87,19 +90,18 @@ public class KudaGoApiClient {
                         Array.newInstance(responseType.getComponentType(), 0))))
                 .block();
 
-        if (response == null) {
-            log.error("Received null response for URI: {}", uri);
-            throw new RuntimeException();
-        }
-
-        log.debug("Successfully fetched '{}' entries from '{}'", response.length, uri);
+        log.debug("Successfully fetched '{}' entries from '{}'", Objects.requireNonNull(response).length, uri);
         return Arrays.asList(response);
     }
 
     private Mono<EventsResponse> getEventsFromPageReactive(LocalDate dateFrom, LocalDate dateTo, int page) {
         return getEventsFromPage(dateFrom, dateTo, page)
                 .onErrorResume(WebClientResponseException.NotFound.class,
-                        error -> Mono.just(new EventsResponse()));
+                        error -> Mono.just(new EventsResponse()))
+                .onErrorResume(WebClientResponseException.ServiceUnavailable.class,
+                        error -> Mono.error(new ServiceUnavailableException()))
+                .onErrorResume(WebClientRequestException.class,
+                        error -> Mono.error(new ServiceUnavailableException()));
     }
 
     private CompletableFuture<EventsResponse> getEventsFromPageFuture(LocalDate dateFrom, LocalDate dateTo, int page) {
@@ -107,11 +109,10 @@ public class KudaGoApiClient {
                 .toFuture()
                 .exceptionally(throwable -> {
                     if (throwable instanceof WebClientResponseException.NotFound) {
-                        log.error("NOT FOUND STOP NOW");
                         return new EventsResponse();
                     }
-                    log.error("NOT FOUND BLOCKED STOP");
-                    throw new RuntimeException(throwable);
+                    log.error("Error occurred while data fetch from API");
+                    throw new ServiceUnavailableException();
                 });
     }
 
