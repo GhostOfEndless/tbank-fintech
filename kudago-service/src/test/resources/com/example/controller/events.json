@@ -1,0 +1,9 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPattern": "/events/.*"
+  },
+  "response": {
+    "proxyBaseUrl": "https://kudago.com/public-api/v1.4"
+  }
+}

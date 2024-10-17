@@ -1,0 +1,9 @@
+{
+  "request": {
+    "method": "POST",
+    "urlPattern": "/convert"
+  },
+  "response": {
+    "proxyBaseUrl": "http://192.168.0.132:8081/api/v1/currencies"
+  }
+}

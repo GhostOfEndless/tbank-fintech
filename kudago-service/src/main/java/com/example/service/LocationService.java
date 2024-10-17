@@ -19,6 +19,7 @@ public class LocationService {
     private final KudaGoApiClient kudaGoApiClient;
 
     public void init() {
+        repository.deleteAll();
         log.info("Fetching locations from API...");
         kudaGoApiClient.fetchLocations()
                 .forEach(payload -> repository.save(

@@ -2,7 +2,13 @@ package com.example.repository;
 
 import com.example.entity.Location;
 import com.example.repository.impl.InMemoryRepositoryImpl;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
+
+import java.util.stream.IntStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
@@ -30,6 +36,41 @@ public class InMemoryRepositoryTest {
         assertThat(result)
                 .hasSize(2)
                 .contains(locationOne, locationTwo);
+    }
+
+    @Test
+    @Tag("Delete")
+    @DisplayName("Delete should remove the entity from repository")
+    void delete_success() {
+        var location = new Location();
+        repository.save(location);
+
+        repository.delete(location.getId());
+
+        assertThat(repository.findAll()).isEmpty();
+    }
+
+    @Test
+    @Tag("DeleteAll")
+    @DisplayName("DeleteAll should remove all entities from repository")
+    void deleteAll_success() {
+        IntStream.rangeClosed(0, 10)
+                .forEach(i -> repository.save(new Location()));
+
+        repository.deleteAll();
+
+        assertThat(repository.findAll()).isEmpty();
+    }
+
+    @Test
+    @Tag("existsById")
+    @DisplayName("ExistsById should return true for existing and false for non-existing entities")
+    void existsById_existedAndNotExisted() {
+        var location = new Location();
+        repository.save(location);
+
+        assertThat(repository.existsById(location.getId())).isTrue();
+        assertThat(repository.existsById(location.getId() + 1)).isFalse();
     }
 
     @Nested
@@ -75,6 +116,21 @@ public class InMemoryRepositoryTest {
             assertThat(repository.findAll()).hasSize(1);
         }
 
+        @Test
+        @DisplayName("Save existed element should update it")
+        void save_existedSuccess() {
+            var location = new Location();
+
+            var savedLocation = repository.save(location);
+            var newLocation = Location.builder()
+                    .id(savedLocation.getId())
+                    .build();
+            var updatedLocation = repository.save(newLocation);
+
+            assertThat(updatedLocation.getId()).isEqualTo(savedLocation.getId());
+            assertThat(repository.findAll()).hasSize(1);
+        }
+
 
         @Test
         @DisplayName("Save should successfully update an existing entity")
@@ -96,28 +152,5 @@ public class InMemoryRepositoryTest {
                     .isInstanceOf(IllegalArgumentException.class)
                     .hasMessage("Entity cannot be null!");
         }
-    }
-
-    @Test
-    @Tag("Delete")
-    @DisplayName("Delete should remove the entity from repository")
-    void delete_success() {
-        var location = new Location();
-        repository.save(location);
-
-        repository.delete(location.getId());
-
-        assertThat(repository.findAll()).isEmpty();
-    }
-
-    @Test
-    @Tag("existsById")
-    @DisplayName("ExistsById should return true for existing and false for non-existing entities")
-    void existsById_existedAndNotExisted() {
-        var location = new Location();
-        repository.save(location);
-
-        assertThat(repository.existsById(location.getId())).isTrue();
-        assertThat(repository.existsById(location.getId() + 1)).isFalse();
     }
 }

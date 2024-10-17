@@ -14,4 +14,6 @@ public interface InMemoryRepository<K, V> {
     void delete(K id);
 
     boolean existsById(K id);
+
+    void deleteAll();
 }
