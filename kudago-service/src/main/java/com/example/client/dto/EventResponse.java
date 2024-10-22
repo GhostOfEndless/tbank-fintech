@@ -2,16 +2,14 @@ package com.example.client.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.Getter;
 
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 @Schema(description = "Информация о мероприятии")
-@Data
-@AllArgsConstructor
+@Getter
 public class EventResponse {
 
     private static final Pattern PRICE_PATTERN = Pattern.compile("\\d+(?:\\s?\\d+)*");
@@ -27,7 +25,7 @@ public class EventResponse {
 
     @Schema(description = "Признак бесплатного мероприятия")
     @JsonProperty("is_free")
-    private boolean isFree;
+    private boolean free;
 
     @JsonProperty("dates")
     private List<DateResponse> dates;
@@ -36,7 +34,7 @@ public class EventResponse {
     private PlaceResponse place;
 
     public boolean isFitsBudget(Float budget) {
-        if (isFree) {
+        if (free) {
             return true;
         }
 

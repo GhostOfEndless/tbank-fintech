@@ -1,19 +1,15 @@
 package com.example.client.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.Getter;
 
 import java.util.ArrayList;
 import java.util.List;
 
-@Data
-@AllArgsConstructor
-@NoArgsConstructor
+@Getter
 public class EventsResponse {
 
+    private final List<EventResponse> results = new ArrayList<>();
     private int count;
     private String next;
     private String previous;
-    private List<EventResponse> results = new ArrayList<>();
 }

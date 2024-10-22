@@ -1,22 +1,23 @@
 package com.example.entity;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 
 @SuperBuilder
-@Getter
 @Setter
+@Getter
 @NoArgsConstructor
-@AllArgsConstructor
-@EqualsAndHashCode(callSuper = false)
-//@Entity
-//@Table(name = "t_locations", schema = "kudago")
+@EqualsAndHashCode(callSuper = true)
+@Entity
+@Table(name = "t_locations", schema = "kudago")
 public class Location extends AbstractEntity {
 
-    @JsonProperty("slug")
+    @Column(name = "c_slug", nullable = false, unique = true)
     private String slug;
 
-    @JsonProperty("name")
+    @Column(name = "c_name", nullable = false)
     private String name;
 }

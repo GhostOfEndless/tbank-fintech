@@ -1,13 +1,12 @@
 package com.example.client.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.AllArgsConstructor;
-import lombok.Data;
+
+import lombok.Getter;
 
 import java.time.Instant;
 
-@Data
-@AllArgsConstructor
+@Getter
 public class DateResponse {
 
     @JsonProperty("start")

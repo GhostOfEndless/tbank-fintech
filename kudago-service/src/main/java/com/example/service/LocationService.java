@@ -2,7 +2,7 @@ package com.example.service;
 
 import com.example.client.KudaGoApiClient;
 import com.example.entity.Location;
-import com.example.repository.LocationRepository;
+import com.example.repository.inmemory.LocationInMemoryRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -15,7 +15,7 @@ import java.util.NoSuchElementException;
 @RequiredArgsConstructor
 public class LocationService {
 
-    private final LocationRepository repository;
+    private final LocationInMemoryRepository repository;
     private final KudaGoApiClient kudaGoApiClient;
 
     public void init() {

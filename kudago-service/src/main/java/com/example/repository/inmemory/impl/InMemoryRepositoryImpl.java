@@ -1,7 +1,7 @@
-package com.example.repository.impl;
+package com.example.repository.inmemory.impl;
 
 import com.example.entity.AbstractEntity;
-import com.example.repository.InMemoryRepository;
+import com.example.repository.inmemory.InMemoryRepository;
 
 import java.util.ArrayList;
 import java.util.List;

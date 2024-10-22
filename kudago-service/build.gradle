@@ -1,5 +1,5 @@
 plugins {
-    id 'org.springframework.boot' version '3.3.3'
+    id 'org.springframework.boot' version '3.3.4'
     id 'io.spring.dependency-management' version '1.1.6'
     id 'io.freefair.lombok' version '8.10'
     id 'java'
@@ -14,17 +14,24 @@ repositories {
 }
 
 dependencies {
+    // spring starters
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
-//    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-    implementation 'org.springframework.retry:spring-retry:2.0.9'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'org.springframework.boot:spring-boot-starter-webflux'
-    implementation 'com.google.guava:guava:33.3.1-jre'
+
+    // other spring libs
     implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.6.0'
+    implementation 'org.springframework.retry:spring-retry:2.0.10'
+    implementation 'org.postgresql:postgresql:42.7.4'
+
+    // utils
+    implementation 'com.google.guava:guava:33.3.1-jre'
     implementation project(':log-aspect')
 
+    // tests
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
-    testImplementation 'org.testcontainers:junit-jupiter:1.20.1'
+    testImplementation 'org.testcontainers:junit-jupiter:1.20.2'
     implementation 'org.wiremock.integrations.testcontainers:wiremock-testcontainers-module:1.0-alpha-14'
     testImplementation 'org.wiremock:wiremock-standalone:3.9.1'
 }

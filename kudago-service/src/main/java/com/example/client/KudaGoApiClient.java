@@ -127,7 +127,7 @@ public class KudaGoApiClient {
                         .queryParam("text_format", "text")
                         .queryParam("location", "msk")
                         .queryParam("fields", "id,title,price,is_free,dates,place")
-                        .queryParam("expand", "dates,place")
+                        .queryParam("expand", "place")
                         .build())
                 .retrieve()
                 .bodyToMono(EventsResponse.class);

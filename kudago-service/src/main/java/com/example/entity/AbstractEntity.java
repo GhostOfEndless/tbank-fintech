@@ -1,7 +1,9 @@
 package com.example.entity;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.AllArgsConstructor;
+import jakarta.persistence.Column;
+import jakarta.persistence.Id;
+import jakarta.persistence.MappedSuperclass;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -9,12 +11,13 @@ import lombok.experimental.SuperBuilder;
 
 @SuperBuilder
 @NoArgsConstructor
-@AllArgsConstructor
-@Getter
 @Setter
+@Getter
+@MappedSuperclass
+@EqualsAndHashCode(exclude = {"id"})
 public abstract class AbstractEntity {
 
-    @SuppressWarnings("unused")
-    @JsonProperty("id")
+    @Id
+    @Column(unique = true, nullable = false)
     protected Long id;
 }
