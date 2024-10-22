@@ -3,7 +3,7 @@ package com.example.service;
 
 import com.example.client.CurrencyServiceApiClient;
 import com.example.client.KudaGoApiClient;
-import com.example.entity.Event;
+import com.example.client.dto.EventResponse;
 import com.example.exception.DateBoundsException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -27,8 +27,8 @@ public class EventService {
     private final KudaGoApiClient kudaGoApiClient;
     private final CurrencyServiceApiClient currencyApiClient;
 
-    public Mono<List<Event>> getEventsReactive(@NotNull Float budget, @NotNull String currencyCode,
-                                               LocalDate dateFrom, LocalDate dateTo) {
+    public Mono<List<EventResponse>> getEventsReactive(@NotNull Float budget, @NotNull String currencyCode,
+                                                       LocalDate dateFrom, LocalDate dateTo) {
         var dateBounds = getDateBounds(dateFrom, dateTo);
 
         return Mono.zip(
@@ -36,27 +36,27 @@ public class EventService {
                 kudaGoApiClient.getEventsReactive(dateBounds.from(), dateBounds.to())
         ).map(tuple -> {
             Float convertedBudget = tuple.getT1();
-            List<Event> events = tuple.getT2();
+            List<EventResponse> eventResponses = tuple.getT2();
 
-            return events.stream()
+            return eventResponses.stream()
                     .filter(event -> event.isFitsBudget(convertedBudget))
                     .toList();
         });
     }
 
     @Async("asyncExecutor")
-    public CompletableFuture<List<Event>> getEventsFuture(@NotNull Float budget, @NotNull String currencyCode,
-                                                          LocalDate dateFrom, LocalDate dateTo) {
+    public CompletableFuture<List<EventResponse>> getEventsFuture(@NotNull Float budget, @NotNull String currencyCode,
+                                                                  LocalDate dateFrom, LocalDate dateTo) {
         var dateBounds = getDateBounds(dateFrom, dateTo);
         var convertedBudgetFuture = currencyApiClient.convertBudgetToRublesFuture(budget, currencyCode);
         var eventsFuture = kudaGoApiClient.getEventsFuture(dateBounds.from(), dateBounds.to());
-        var resultFuture = new CompletableFuture<List<Event>>();
+        var resultFuture = new CompletableFuture<List<EventResponse>>();
 
         convertedBudgetFuture.thenAcceptBoth(eventsFuture, (convertedBudget, events) -> {
-            List<Event> filteredEvents = events.stream()
+            List<EventResponse> filteredEventResponses = events.stream()
                     .filter(event -> event.isFitsBudget(convertedBudget))
                     .collect(Collectors.toList());
-            resultFuture.complete(filteredEvents);
+            resultFuture.complete(filteredEventResponses);
         }).exceptionally(ex -> {
             resultFuture.completeExceptionally(ex);
             return null;

@@ -1,4 +1,4 @@
-package com.example.entity;
+package com.example.client.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -15,5 +15,5 @@ public class EventsResponse {
     private int count;
     private String next;
     private String previous;
-    private List<Event> results = new ArrayList<>();
+    private List<EventResponse> results = new ArrayList<>();
 }

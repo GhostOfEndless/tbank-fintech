@@ -10,6 +10,8 @@ import lombok.experimental.SuperBuilder;
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = false)
+//@Entity
+//@Table(name = "t_locations", schema = "kudago")
 public class Location extends AbstractEntity {
 
     @JsonProperty("slug")

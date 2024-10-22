@@ -2,8 +2,8 @@ package com.example.client;
 
 import com.example.controller.payload.CategoryPayload;
 import com.example.controller.payload.LocationPayload;
-import com.example.entity.Event;
-import com.example.entity.EventsResponse;
+import com.example.client.dto.EventResponse;
+import com.example.client.dto.EventsResponse;
 import com.example.exception.ServiceUnavailableException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -54,7 +54,7 @@ public class KudaGoApiClient {
         return fetchData("/locations/", LocationPayload[].class);
     }
 
-    public Mono<List<Event>> getEventsReactive(LocalDate dateFrom, LocalDate dateTo) {
+    public Mono<List<EventResponse>> getEventsReactive(LocalDate dateFrom, LocalDate dateTo) {
         return Flux.range(1, Integer.MAX_VALUE)
                 .concatMap(page -> getEventsFromPageReactive(dateFrom, dateTo, page))
                 .takeWhile(eventsResponse -> !eventsResponse.getResults().isEmpty())
@@ -62,19 +62,19 @@ public class KudaGoApiClient {
                 .collectList();
     }
 
-    public CompletableFuture<List<Event>> getEventsFuture(LocalDate dateFrom, LocalDate dateTo) {
+    public CompletableFuture<List<EventResponse>> getEventsFuture(LocalDate dateFrom, LocalDate dateTo) {
         return CompletableFuture.supplyAsync(() -> {
-            List<Event> allEvents = new ArrayList<>();
+            List<EventResponse> allEventResponses = new ArrayList<>();
             int page = 1;
             while (true) {
                 EventsResponse eventsResponse = getEventsFromPageFuture(dateFrom, dateTo, page).join();
                 if (eventsResponse.getResults().isEmpty()) {
                     break;
                 }
-                allEvents.addAll(eventsResponse.getResults());
+                allEventResponses.addAll(eventsResponse.getResults());
                 page++;
             }
-            return allEvents;
+            return allEventResponses;
         });
     }
 
@@ -126,7 +126,8 @@ public class KudaGoApiClient {
                         .queryParam("order_by", "is_free,price")
                         .queryParam("text_format", "text")
                         .queryParam("location", "msk")
-                        .queryParam("fields", "id,title,price,is_free")
+                        .queryParam("fields", "id,title,price,is_free,dates,place")
+                        .queryParam("expand", "dates,place")
                         .build())
                 .retrieve()
                 .bodyToMono(EventsResponse.class);

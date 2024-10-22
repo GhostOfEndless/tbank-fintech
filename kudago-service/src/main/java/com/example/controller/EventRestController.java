@@ -1,6 +1,6 @@
 package com.example.controller;
 
-import com.example.entity.Event;
+import com.example.client.dto.EventResponse;
 import com.example.service.EventService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -43,7 +43,7 @@ public class EventRestController {
                     description = "Успешное получение списка мероприятий",
                     content = @Content(
                             mediaType = "application/json",
-                            array = @ArraySchema(schema = @Schema(implementation = Event.class))
+                            array = @ArraySchema(schema = @Schema(implementation = EventResponse.class))
                     )
             ),
             @ApiResponse(
@@ -64,7 +64,7 @@ public class EventRestController {
             )
     })
     @GetMapping("/reactive")
-    public List<Event> getEventsReactive(
+    public List<EventResponse> getEventsReactive(
             @Parameter(description = "Бюджет пользователя (должен быть положительным)")
             @Positive(message = "{budget.should_be_positive}")
             @RequestParam Float budget,
@@ -93,7 +93,7 @@ public class EventRestController {
                     description = "Успешное получение списка мероприятий",
                     content = @Content(
                             mediaType = "application/json",
-                            array = @ArraySchema(schema = @Schema(implementation = Event.class))
+                            array = @ArraySchema(schema = @Schema(implementation = EventResponse.class))
                     )
             ),
             @ApiResponse(
@@ -114,7 +114,7 @@ public class EventRestController {
             )
     })
     @GetMapping("/future")
-    public List<Event> getEventsFuture(
+    public List<EventResponse> getEventsFuture(
             @Parameter(description = "Бюджет пользователя (должен быть положительным)")
             @Positive(message = "{budget.should_be_positive}")
             @RequestParam Float budget,
