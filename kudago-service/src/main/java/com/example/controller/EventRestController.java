@@ -80,7 +80,7 @@ public class EventRestController {
             @Parameter(description = "Конечная дата (формат: YYYY-MM-DD)", example = "2024-12-31")
             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
             @RequestParam(required = false) LocalDate dateTo) {
-        return eventService.getEventsReactive(budget, currency, dateFrom, dateTo).block();
+        return eventService.fetchEventsReactive(budget, currency, dateFrom, dateTo, "kzn").block();
     }
 
     @Operation(
@@ -130,6 +130,6 @@ public class EventRestController {
             @Parameter(description = "Конечная дата (формат: YYYY-MM-DD)", example = "2024-12-31")
             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
             @RequestParam(required = false) LocalDate dateTo) {
-        return eventService.getEventsFuture(budget, currency, dateFrom, dateTo).join();
+        return eventService.fetchEventsFuture(budget, currency, dateFrom, dateTo, "kzn").join();
     }
 }

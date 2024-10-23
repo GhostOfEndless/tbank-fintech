@@ -1,9 +1,9 @@
 package com.example.client;
 
-import com.example.controller.payload.CategoryPayload;
-import com.example.controller.payload.LocationPayload;
 import com.example.client.dto.EventResponse;
 import com.example.client.dto.EventsResponse;
+import com.example.controller.payload.CategoryPayload;
+import com.example.controller.payload.LocationPayload;
 import com.example.exception.ServiceUnavailableException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -54,20 +54,22 @@ public class KudaGoApiClient {
         return fetchData("/locations/", LocationPayload[].class);
     }
 
-    public Mono<List<EventResponse>> getEventsReactive(LocalDate dateFrom, LocalDate dateTo) {
+    public Mono<List<EventResponse>> getEventsReactive(LocalDate dateFrom, LocalDate dateTo, String location) {
         return Flux.range(1, Integer.MAX_VALUE)
-                .concatMap(page -> getEventsFromPageReactive(dateFrom, dateTo, page))
+                .concatMap(page -> getEventsFromPageReactive(dateFrom, dateTo, location, page))
                 .takeWhile(eventsResponse -> !eventsResponse.getResults().isEmpty())
                 .flatMapIterable(EventsResponse::getResults)
                 .collectList();
     }
 
-    public CompletableFuture<List<EventResponse>> getEventsFuture(LocalDate dateFrom, LocalDate dateTo) {
+    public CompletableFuture<List<EventResponse>> getEventsFuture(
+            LocalDate dateFrom, LocalDate dateTo, String location
+    ) {
         return CompletableFuture.supplyAsync(() -> {
             List<EventResponse> allEventResponses = new ArrayList<>();
             int page = 1;
             while (true) {
-                EventsResponse eventsResponse = getEventsFromPageFuture(dateFrom, dateTo, page).join();
+                EventsResponse eventsResponse = getEventsFromPageFuture(dateFrom, dateTo, location, page).join();
                 if (eventsResponse.getResults().isEmpty()) {
                     break;
                 }
@@ -94,8 +96,9 @@ public class KudaGoApiClient {
         return Arrays.asList(response);
     }
 
-    private Mono<EventsResponse> getEventsFromPageReactive(LocalDate dateFrom, LocalDate dateTo, int page) {
-        return getEventsFromPage(dateFrom, dateTo, page)
+    private Mono<EventsResponse> getEventsFromPageReactive(LocalDate dateFrom, LocalDate dateTo,
+                                                           String location, int page) {
+        return getEventsFromPage(dateFrom, dateTo, location, page)
                 .onErrorResume(WebClientResponseException.NotFound.class,
                         error -> Mono.just(new EventsResponse()))
                 .onErrorResume(WebClientResponseException.ServiceUnavailable.class,
@@ -104,8 +107,9 @@ public class KudaGoApiClient {
                         error -> Mono.error(new ServiceUnavailableException()));
     }
 
-    private CompletableFuture<EventsResponse> getEventsFromPageFuture(LocalDate dateFrom, LocalDate dateTo, int page) {
-        return getEventsFromPage(dateFrom, dateTo, page)
+    private CompletableFuture<EventsResponse> getEventsFromPageFuture(LocalDate dateFrom, LocalDate dateTo,
+                                                                      String location, int page) {
+        return getEventsFromPage(dateFrom, dateTo, location, page)
                 .toFuture()
                 .exceptionally(throwable -> {
                     if (throwable instanceof WebClientResponseException.NotFound) {
@@ -116,7 +120,7 @@ public class KudaGoApiClient {
                 });
     }
 
-    private Mono<EventsResponse> getEventsFromPage(LocalDate dateFrom, LocalDate dateTo, int page) {
+    private Mono<EventsResponse> getEventsFromPage(LocalDate dateFrom, LocalDate dateTo, String location, int page) {
         return kudaGoWebClient.get()
                 .uri(uriBuilder -> uriBuilder
                         .path("/events/")
@@ -125,7 +129,7 @@ public class KudaGoApiClient {
                         .queryParam("page", page)
                         .queryParam("order_by", "is_free,price")
                         .queryParam("text_format", "text")
-                        .queryParam("location", "msk")
+                        .queryParam("location", location)
                         .queryParam("fields", "id,title,price,is_free,dates,place")
                         .queryParam("expand", "place")
                         .build())

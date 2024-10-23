@@ -30,9 +30,6 @@ public class EventResponse {
     @JsonProperty("dates")
     private List<DateResponse> dates;
 
-    @JsonProperty("place")
-    private PlaceResponse place;
-
     public boolean isFitsBudget(Float budget) {
         if (free) {
             return true;

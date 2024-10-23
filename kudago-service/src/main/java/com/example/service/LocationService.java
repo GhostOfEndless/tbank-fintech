@@ -2,7 +2,7 @@ package com.example.service;
 
 import com.example.client.KudaGoApiClient;
 import com.example.entity.Location;
-import com.example.repository.inmemory.LocationInMemoryRepository;
+import com.example.repository.jpa.LocationRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -15,32 +15,35 @@ import java.util.NoSuchElementException;
 @RequiredArgsConstructor
 public class LocationService {
 
-    private final LocationInMemoryRepository repository;
+    private final LocationRepository locationRepository;
     private final KudaGoApiClient kudaGoApiClient;
 
     public void init() {
-        repository.deleteAll();
         log.info("Fetching locations from API...");
         kudaGoApiClient.fetchLocations()
-                .forEach(payload -> repository.save(
-                        Location.builder()
-                                .slug(payload.slug())
-                                .name(payload.name())
-                                .build()));
+                .forEach(payload -> {
+                    if (!locationRepository.existsBySlug(payload.slug()))
+                        locationRepository.save(
+                                Location.builder()
+                                        .slug(payload.slug())
+                                        .name(payload.name())
+                                        .build());
+                });
+
         log.info("Locations added!");
     }
 
     public List<Location> getAllLocations() {
-        return repository.findAll();
+        return locationRepository.findAll();
     }
 
     public Location getLocationById(Long id) {
-        return repository.findById(id).orElseThrow(() ->
+        return locationRepository.findById(id).orElseThrow(() ->
                 new NoSuchElementException("location.not_found"));
     }
 
     public Location createLocation(String slug, String name) {
-        return repository.save(
+        return locationRepository.save(
                 Location.builder()
                         .slug(slug)
                         .name(name)
@@ -48,8 +51,8 @@ public class LocationService {
     }
 
     public Location updateLocation(Long id, String slug, String name) {
-        if (repository.existsById(id)) {
-            return repository.save(
+        if (locationRepository.existsById(id)) {
+            return locationRepository.save(
                     Location.builder()
                             .id(id)
                             .slug(slug)
@@ -60,8 +63,8 @@ public class LocationService {
     }
 
     public void deleteLocation(Long id) {
-        if (repository.existsById(id)) {
-            repository.delete(id);
+        if (locationRepository.existsById(id)) {
+            locationRepository.deleteById(id);
             return;
         }
         throw new NoSuchElementException("location.not_found");

@@ -4,7 +4,9 @@ package com.example.service;
 import com.example.client.CurrencyServiceApiClient;
 import com.example.client.KudaGoApiClient;
 import com.example.client.dto.EventResponse;
+import com.example.entity.Event;
 import com.example.exception.DateBoundsException;
+import com.example.repository.jpa.EventRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
@@ -26,14 +28,39 @@ public class EventService {
 
     private final KudaGoApiClient kudaGoApiClient;
     private final CurrencyServiceApiClient currencyApiClient;
+    private final LocationService locationService;
+    private final EventRepository eventRepository;
 
-    public Mono<List<EventResponse>> getEventsReactive(@NotNull Float budget, @NotNull String currencyCode,
-                                                       LocalDate dateFrom, LocalDate dateTo) {
-        var dateBounds = getDateBounds(dateFrom, dateTo);
+    public void init() {
+        var dateBound = buildDateBounds(null, null);
+        var locations = locationService.getAllLocations();
+
+        locations.forEach(location ->
+                kudaGoApiClient.getEventsFuture(dateBound.from(), dateBound.to(), location.getSlug())
+                        .join().forEach(eventResponse -> {
+
+                            var event = Event.builder()
+                                    .id(eventResponse.getId())
+                                    .name(eventResponse.getTitle())
+                                    .location(location)
+                                    .startDate(eventResponse.getDates().getFirst().getStart())
+                                    .price(eventResponse.getPrice())
+                                    .free(eventResponse.isFree())
+                                    .build();
+
+                            if (eventRepository.existsById(event.getId())) {
+                                eventRepository.save(event);
+                            }
+                        }));
+    }
+
+    public Mono<List<EventResponse>> fetchEventsReactive(@NotNull Float budget, @NotNull String currencyCode,
+                                                         LocalDate dateFrom, LocalDate dateTo, String location) {
+        var dateBounds = buildDateBounds(dateFrom, dateTo);
 
         return Mono.zip(
                 currencyApiClient.convertBudgetToRublesReactive(budget, currencyCode),
-                kudaGoApiClient.getEventsReactive(dateBounds.from(), dateBounds.to())
+                kudaGoApiClient.getEventsReactive(dateBounds.from(), dateBounds.to(), location)
         ).map(tuple -> {
             Float convertedBudget = tuple.getT1();
             List<EventResponse> eventResponses = tuple.getT2();
@@ -45,11 +72,12 @@ public class EventService {
     }
 
     @Async("asyncExecutor")
-    public CompletableFuture<List<EventResponse>> getEventsFuture(@NotNull Float budget, @NotNull String currencyCode,
-                                                                  LocalDate dateFrom, LocalDate dateTo) {
-        var dateBounds = getDateBounds(dateFrom, dateTo);
+    public CompletableFuture<List<EventResponse>> fetchEventsFuture(@NotNull Float budget, @NotNull String currencyCode,
+                                                                    LocalDate dateFrom, LocalDate dateTo,
+                                                                    String location) {
+        var dateBounds = buildDateBounds(dateFrom, dateTo);
         var convertedBudgetFuture = currencyApiClient.convertBudgetToRublesFuture(budget, currencyCode);
-        var eventsFuture = kudaGoApiClient.getEventsFuture(dateBounds.from(), dateBounds.to());
+        var eventsFuture = kudaGoApiClient.getEventsFuture(dateBounds.from(), dateBounds.to(), location);
         var resultFuture = new CompletableFuture<List<EventResponse>>();
 
         convertedBudgetFuture.thenAcceptBoth(eventsFuture, (convertedBudget, events) -> {
@@ -65,7 +93,7 @@ public class EventService {
         return resultFuture;
     }
 
-    private DateBounds getDateBounds(LocalDate dateFrom, LocalDate dateTo) {
+    private DateBounds buildDateBounds(LocalDate dateFrom, LocalDate dateTo) {
         if (Objects.isNull(dateFrom) && Objects.isNull(dateTo)) {
             var currentDate = LocalDate.now();
             dateFrom = currentDate.with(DayOfWeek.MONDAY);

@@ -3,27 +3,36 @@ package com.example.entity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
+import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.experimental.SuperBuilder;
 
 import java.time.Instant;
 
+@SuperBuilder
+@Setter
 @Getter
 @NoArgsConstructor
-@EqualsAndHashCode(callSuper = true)
+@EqualsAndHashCode(exclude = {"id"})
 @Entity
 @Table(name = "t_events", schema = "kudago")
-public class Event extends AbstractEntity {
+public class Event {
+
+    @Id
+    @Column(nullable = false)
+    private Long id;
 
     @Column(name = "c_name", nullable = false)
     private String name;
 
     @Column(name = "c_start_date", nullable = false)
-    private Instant start_date;
+    private Instant startDate;
 
     @Column(name = "c_price")
     private String price;

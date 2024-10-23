@@ -3,7 +3,7 @@ package com.example.service;
 import com.example.client.KudaGoApiClient;
 import com.example.controller.payload.LocationPayload;
 import com.example.entity.Location;
-import com.example.repository.inmemory.LocationInMemoryRepository;
+import com.example.repository.jpa.LocationRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Tag;
@@ -25,7 +25,7 @@ import static org.mockito.Mockito.*;
 public class LocationServiceTest {
 
     @Mock
-    LocationInMemoryRepository repository;
+    LocationRepository repository;
 
     @Mock
     KudaGoApiClient kudaGoApiClient;
@@ -161,7 +161,7 @@ public class LocationServiceTest {
 
             service.deleteLocation(location.getId());
 
-            verify(repository).delete(location.getId());
+            verify(repository).deleteById(location.getId());
             verifyNoMoreInteractions(repository);
         }
 

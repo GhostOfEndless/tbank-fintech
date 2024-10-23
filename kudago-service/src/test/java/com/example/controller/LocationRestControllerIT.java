@@ -274,7 +274,7 @@ public class LocationRestControllerIT extends BaseIT {
         @Test
         @DisplayName("Should return 404 when deleting non-existent location")
         public void deleteLocation_notFound() {
-            mockMvc.perform(delete(uri + "/1"))
+            mockMvc.perform(delete(uri + "/999"))
                     .andExpectAll(
                             status().isNotFound(),
                             content().contentType(MediaType.APPLICATION_PROBLEM_JSON));
