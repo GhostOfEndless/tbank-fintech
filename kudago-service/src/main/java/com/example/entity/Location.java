@@ -1,6 +1,5 @@
 package com.example.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -33,7 +32,6 @@ public class Location extends AbstractEntity {
     @Column(name = "c_name", nullable = false)
     private String name;
 
-    @JsonIgnore
     @Builder.Default
     @OneToMany(mappedBy = "location", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Event> events = new ArrayList<>();

@@ -3,8 +3,14 @@ package com.example.service;
 import com.example.client.CurrencyServiceApiClient;
 import com.example.client.KudaGoApiClient;
 import com.example.client.dto.EventResponse;
+import com.example.controller.dto.EventDTO;
+import com.example.controller.dto.LocationDTO;
+import com.example.controller.payload.EventPayload;
 import com.example.entity.Event;
+import com.example.entity.Location;
 import com.example.exception.DateBoundsException;
+import com.example.exception.EventNotfoundException;
+import com.example.exception.LocationNotFoundException;
 import com.example.repository.jpa.EventRepository;
 import com.example.repository.jpa.LocationRepository;
 import lombok.RequiredArgsConstructor;
@@ -91,6 +97,83 @@ public class EventService {
         });
 
         return resultFuture;
+    }
+
+    public EventDTO getById(Long id) {
+        return eventToDTO(eventRepository.findById(id)
+                .orElseThrow(() -> new EventNotfoundException(id)));
+    }
+
+    public List<EventDTO> getLocationWithEventsId(Long locationId) {
+        var location = locationRepository.findByIdWithEvents(locationId)
+                .orElseThrow(() -> new LocationNotFoundException(locationId));
+
+        return location.getEvents()
+                .stream()
+                .map(this::eventToDTO)
+                .toList();
+    }
+
+    public EventDTO create(EventPayload payload) {
+        var location = getLocationById(payload.placePayload().id());
+
+        var event = Event.builder()
+                .name(payload.name())
+                .price(payload.price())
+                .free(payload.free())
+                .startDate(payload.startDate())
+                .location(location)
+                .build();
+
+        return eventToDTO(eventRepository.save(event));
+    }
+
+    public EventDTO update(Long id, EventPayload payload) {
+        var location = getLocationById(payload.placePayload().id());
+        var oldEvent = eventRepository.findById(id)
+                .orElseThrow(() -> new EventNotfoundException(id));
+
+        var updatedEvent = Event.builder()
+                .id(oldEvent.getId())
+                .name(payload.name())
+                .price(payload.price())
+                .free(payload.free())
+                .startDate(payload.startDate())
+                .location(location)
+                .build();
+
+        return eventToDTO(eventRepository.save(updatedEvent));
+    }
+
+    public void delete(Long id) {
+        var event = eventRepository.findById(id)
+                .orElseThrow(() -> new EventNotfoundException(id));
+
+        eventRepository.delete(event);
+    }
+
+    private Location getLocationById(Long id) {
+        return locationRepository.findById(id)
+                .orElseThrow(() -> new LocationNotFoundException(id));
+    }
+
+    private EventDTO eventToDTO(Event event) {
+        return EventDTO.builder()
+                .id(event.getId())
+                .place(locationToDTO(event.getLocation()))
+                .name(event.getName())
+                .startDate(event.getStartDate())
+                .price(event.getPrice())
+                .free(event.isFree())
+                .build();
+    }
+
+    private LocationDTO locationToDTO(Location location) {
+        return LocationDTO.builder()
+                .id(location.getId())
+                .slug(location.getSlug())
+                .name(location.getName())
+                .build();
     }
 
     private DateBounds buildDateBounds(LocalDate dateFrom, LocalDate dateTo) {

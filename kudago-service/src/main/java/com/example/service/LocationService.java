@@ -60,13 +60,10 @@ public class LocationService {
             var oldLocation = locationRepository.findById(id)
                     .orElseThrow(() -> new LocationNotFoundException(id));
 
-            var location = locationRepository.save(
-                    Location.builder()
-                            .id(id)
-                            .slug(slug)
-                            .name(name)
-                            .events(oldLocation.getEvents())
-                            .build());
+            oldLocation.setSlug(slug);
+            oldLocation.setName(name);
+
+            var location = locationRepository.save(oldLocation);
 
             return new LocationDTO(location.getId(), location.getSlug(), location.getName());
     }
