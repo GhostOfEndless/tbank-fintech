@@ -2,9 +2,10 @@ package com.example.controller;
 
 import com.example.aspect.LogExecutionTime;
 import com.example.exception.DateBoundsException;
-import com.example.exception.EntityNotFoundException;
 import com.example.exception.InvalidCurrencyException;
 import com.example.exception.ServiceUnavailableException;
+import com.example.exception.entity.EntityNotFoundException;
+import com.example.exception.entity.RelatedEntityNotFoundException;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
 import lombok.RequiredArgsConstructor;
@@ -38,6 +39,7 @@ public class BadRequestControllerAdvice {
                 .forStatusAndDetail(HttpStatus.BAD_REQUEST,
                         messageSource.getMessage("errors.400.title", new Object[0],
                                 "errors.400.title", locale));
+
         problemDetail.setProperty("errors",
                 exception.getAllErrors().stream()
                         .map(ObjectError::getDefaultMessage)
@@ -52,13 +54,10 @@ public class BadRequestControllerAdvice {
             MissingServletRequestParameterException exception, Locale locale) {
         var problemDetail = ProblemDetail
                 .forStatusAndDetail(HttpStatus.BAD_REQUEST,
-                        messageSource.getMessage("errors.400.title", new Object[0],
-                                "errors.400.title", locale));
-
-        problemDetail.setProperty("errors", Objects.requireNonNull(
-                        messageSource.getMessage("request.param.not_specified", new Object[0],
-                                "request.param.not_specified", locale))
-                .formatted(exception.getParameterName(), exception.getParameterType()));
+                        Objects.requireNonNull(
+                                        messageSource.getMessage("request.param.not_specified", new Object[0],
+                                                "request.param.not_specified", locale))
+                                .formatted(exception.getParameterName(), exception.getParameterType()));
 
         return ResponseEntity.badRequest()
                 .body(problemDetail);
@@ -83,16 +82,11 @@ public class BadRequestControllerAdvice {
 
     @ExceptionHandler(DateBoundsException.class)
     public ResponseEntity<ProblemDetail> handleDateBoundsException(DateBoundsException exception, Locale locale) {
-        var problemDetail = ProblemDetail
-                .forStatusAndDetail(HttpStatus.BAD_REQUEST,
-                        messageSource.getMessage("errors.400.title", new Object[0],
-                                "errors.400.title", locale));
-
-        problemDetail.setProperty("error", messageSource.getMessage(exception.getMessage(), new Object[0],
-                exception.getMessage(), locale));
-
         return ResponseEntity.badRequest()
-                .body(problemDetail);
+                .body(ProblemDetail
+                        .forStatusAndDetail(HttpStatus.BAD_REQUEST,
+                                messageSource.getMessage(exception.getMessage(), new Object[0],
+                                        exception.getMessage(), locale)));
     }
 
     @ExceptionHandler(InvalidCurrencyException.class)
@@ -100,12 +94,8 @@ public class BadRequestControllerAdvice {
                                                                         Locale locale) {
         var problemDetail = ProblemDetail
                 .forStatusAndDetail(HttpStatus.BAD_REQUEST,
-                        messageSource.getMessage("errors.400.title", new Object[0],
-                                "errors.400.title", locale));
-
-        problemDetail.setProperty("error", Objects.requireNonNull(
-                messageSource.getMessage(exception.getMessage(), new Object[0],
-                        exception.getMessage(), locale)).formatted(exception.getCurrency()));
+                        Objects.requireNonNull(messageSource.getMessage(exception.getMessage(), new Object[0],
+                                exception.getMessage(), locale)).formatted(exception.getCurrency()));
 
         return ResponseEntity.badRequest()
                 .body(problemDetail);
@@ -114,39 +104,28 @@ public class BadRequestControllerAdvice {
     @ExceptionHandler(ServiceUnavailableException.class)
     public ResponseEntity<ProblemDetail> handleInvalidCurrencyException(ServiceUnavailableException exception,
                                                                         Locale locale) {
-        var problemDetail = ProblemDetail
-                .forStatusAndDetail(HttpStatus.SERVICE_UNAVAILABLE,
-                        messageSource.getMessage("errors.503.title", new Object[0],
-                                "errors.503.title", locale));
-
-        problemDetail.setProperty("error", messageSource.getMessage(exception.getMessage(), new Object[0],
-                exception.getMessage(), locale));
-
-        return ResponseEntity
-                .status(HttpStatus.SERVICE_UNAVAILABLE)
-                .body(problemDetail);
+        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
+                .body(ProblemDetail
+                        .forStatusAndDetail(HttpStatus.SERVICE_UNAVAILABLE,
+                                messageSource.getMessage(exception.getMessage(), new Object[0],
+                                        exception.getMessage(), locale)));
     }
 
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
     public ResponseEntity<ProblemDetail> handleMethodArgumentTypeMismatchException(
             MethodArgumentTypeMismatchException exception,
             Locale locale) {
-        var problemDetail = ProblemDetail
-                .forStatusAndDetail(HttpStatus.BAD_REQUEST,
-                        messageSource.getMessage("errors.400.title", new Object[0],
-                                "errors.400.title", locale));
 
-        problemDetail.setProperty("error", messageSource.getMessage(exception.getMessage(), new Object[0],
-                exception.getMessage(), locale));
-
-        return ResponseEntity
-                .status(HttpStatus.BAD_REQUEST)
-                .body(problemDetail);
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(ProblemDetail
+                        .forStatusAndDetail(HttpStatus.BAD_REQUEST,
+                                messageSource.getMessage(exception.getMessage(), new Object[0],
+                                        exception.getMessage(), locale)));
     }
 
     @ExceptionHandler(NoSuchElementException.class)
     public ResponseEntity<ProblemDetail> handleNoSuchElementException(NoSuchElementException exception,
-                                                                       Locale locale) {
+                                                                      Locale locale) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
                 .body(ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND,
                         messageSource.getMessage(exception.getMessage(), new Object[0],
@@ -158,6 +137,15 @@ public class BadRequestControllerAdvice {
                                                                        Locale locale) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
                 .body(ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND,
+                        messageSource.getMessage(exception.getMessage(), new Object[]{exception.getId()},
+                                exception.getMessage(), locale)));
+    }
+
+    @ExceptionHandler(RelatedEntityNotFoundException.class)
+    public ResponseEntity<ProblemDetail> handleRelatedEntityNotFoundException(RelatedEntityNotFoundException exception,
+                                                                              Locale locale) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST,
                         messageSource.getMessage(exception.getMessage(), new Object[]{exception.getId()},
                                 exception.getMessage(), locale)));
     }

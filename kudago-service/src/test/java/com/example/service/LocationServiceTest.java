@@ -4,7 +4,7 @@ import com.example.client.KudaGoApiClient;
 import com.example.controller.dto.LocationDTO;
 import com.example.controller.payload.LocationPayload;
 import com.example.entity.Location;
-import com.example.exception.LocationNotFoundException;
+import com.example.exception.entity.LocationNotFoundException;
 import com.example.repository.jpa.LocationRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;

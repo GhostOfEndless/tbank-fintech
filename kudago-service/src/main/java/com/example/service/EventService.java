@@ -9,10 +9,12 @@ import com.example.controller.payload.EventPayload;
 import com.example.entity.Event;
 import com.example.entity.Location;
 import com.example.exception.DateBoundsException;
-import com.example.exception.EventNotfoundException;
-import com.example.exception.LocationNotFoundException;
+import com.example.exception.entity.EventNotfoundException;
+import com.example.exception.entity.LocationNotFoundException;
+import com.example.exception.entity.RelatedLocationNotFoundException;
 import com.example.repository.jpa.EventRepository;
 import com.example.repository.jpa.LocationRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Async;
@@ -20,6 +22,7 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
 import java.time.DayOfWeek;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Objects;
@@ -40,12 +43,15 @@ public class EventService {
         var dateBound = buildDateBounds(null, null);
         var locations = locationRepository.findAll();
 
+        if (eventRepository.count() > 0) {
+            return;
+        }
+
         locations.forEach(location ->
                 kudaGoApiClient.getEventsFuture(dateBound.from(), dateBound.to(), location.getSlug())
                         .join().forEach(eventResponse -> {
 
                             var event = Event.builder()
-                                    .id(eventResponse.getId())
                                     .name(eventResponse.getTitle())
                                     .location(location)
                                     .startDate(eventResponse.getDates().getLast().getStart())
@@ -53,9 +59,7 @@ public class EventService {
                                     .free(eventResponse.isFree())
                                     .build();
 
-                            if (!eventRepository.existsById(event.getId())) {
-                                eventRepository.save(event);
-                            }
+                            eventRepository.save(event);
                         })
         );
     }
@@ -99,6 +103,7 @@ public class EventService {
         return resultFuture;
     }
 
+    @Transactional
     public EventDTO getById(Long id) {
         return eventToDTO(eventRepository.findById(id)
                 .orElseThrow(() -> new EventNotfoundException(id)));
@@ -109,6 +114,20 @@ public class EventService {
                 .orElseThrow(() -> new LocationNotFoundException(locationId));
 
         return location.getEvents()
+                .stream()
+                .map(this::eventToDTO)
+                .toList();
+    }
+
+    public List<EventDTO> searchEventsWithQuery(String name, Long locationId, Instant dateFrom, Instant dateTo) {
+        Location location = null;
+
+        if (locationId != null) {
+            location = locationRepository.findById(locationId)
+                    .orElseThrow(() -> new RelatedLocationNotFoundException(locationId));
+        }
+
+        return eventRepository.findEventsByParameters(name, location, dateFrom, dateTo)
                 .stream()
                 .map(this::eventToDTO)
                 .toList();
@@ -128,6 +147,7 @@ public class EventService {
         return eventToDTO(eventRepository.save(event));
     }
 
+    @Transactional
     public EventDTO update(Long id, EventPayload payload) {
         var location = getLocationById(payload.placePayload().id());
         var oldEvent = eventRepository.findById(id)
@@ -154,7 +174,7 @@ public class EventService {
 
     private Location getLocationById(Long id) {
         return locationRepository.findById(id)
-                .orElseThrow(() -> new LocationNotFoundException(id));
+                .orElseThrow(() -> new RelatedLocationNotFoundException(id));
     }
 
     private EventDTO eventToDTO(Event event) {

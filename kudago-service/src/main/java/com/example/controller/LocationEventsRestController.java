@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.time.Instant;
 import java.util.List;
 
 @RestController
@@ -49,5 +50,13 @@ public class LocationEventsRestController {
     public ResponseEntity<Void> deleteEvent(@PathVariable Long id) {
         eventService.delete(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/search")
+    public List<EventDTO> searchEventsWithQuery(@RequestParam(required = false) String name,
+                                                @RequestParam(required = false) Long locationId,
+                                                @RequestParam(required = false) Instant dateFrom,
+                                                @RequestParam(required = false) Instant dateTo) {
+        return eventService.searchEventsWithQuery(name, locationId, dateFrom, dateTo);
     }
 }

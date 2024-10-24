@@ -3,7 +3,7 @@ package com.example.service;
 import com.example.client.KudaGoApiClient;
 import com.example.controller.dto.LocationDTO;
 import com.example.entity.Location;
-import com.example.exception.LocationNotFoundException;
+import com.example.exception.entity.LocationNotFoundException;
 import com.example.repository.jpa.LocationRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

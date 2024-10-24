@@ -14,7 +14,7 @@ CREATE TABLE kudago.t_locations
 --changeset ghostofendless:3
 CREATE TABLE kudago.t_events
 (
-    id            BIGINT PRIMARY KEY,
+    id            BIGSERIAL PRIMARY KEY,
     c_name        TEXT      NOT NULL,
     c_start_date  TIMESTAMP NOT NULL,
     c_price       TEXT,

@@ -1,4 +1,4 @@
-package com.example.exception;
+package com.example.exception.entity;
 
 public class LocationNotFoundException extends EntityNotFoundException {
 
