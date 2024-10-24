@@ -3,7 +3,7 @@ package com.example.service;
 import com.example.client.KudaGoApiClient;
 import com.example.controller.payload.CategoryPayload;
 import com.example.entity.Category;
-import com.example.repository.CategoryRepository;
+import com.example.repository.inmemory.CategoryInMemoryRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Tag;
@@ -25,7 +25,7 @@ import static org.mockito.Mockito.*;
 public class CategoryServiceTest {
 
     @Mock
-    CategoryRepository repository;
+    CategoryInMemoryRepository repository;
 
     @Mock
     KudaGoApiClient kudaGoApiClient;

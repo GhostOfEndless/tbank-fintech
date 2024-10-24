@@ -28,6 +28,9 @@ public class DataLoaderTest {
     private CategoryService categoryService;
 
     @Mock
+    private EventService eventService;
+
+    @Mock
     private LocationService locationService;
 
     private ExecutorService dataLoaderThreadPool;
@@ -44,6 +47,7 @@ public class DataLoaderTest {
         dataLoader = new DataLoader(
                 categoryService,
                 locationService,
+                eventService,
                 dataLoaderThreadPool,
                 scheduledDataInitPool,
                 dataInitSchedule
@@ -81,6 +85,7 @@ public class DataLoaderTest {
         DataLoader dataLoader = new DataLoader(
                 categoryService,
                 locationService,
+                eventService,
                 interruptibleExecutor,
                 scheduledDataInitPool,
                 dataInitSchedule

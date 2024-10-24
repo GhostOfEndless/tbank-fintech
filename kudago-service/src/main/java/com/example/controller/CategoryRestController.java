@@ -6,15 +6,18 @@ import com.example.entity.Category;
 import com.example.service.CategoryService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.context.MessageSource;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
-import java.util.Locale;
-import java.util.NoSuchElementException;
 
 @LogExecutionTime
 @RestController
@@ -23,7 +26,6 @@ import java.util.NoSuchElementException;
 public class CategoryRestController {
 
     private final CategoryService categoryService;
-    private final MessageSource messageSource;
 
     @GetMapping
     public List<Category> getAllCategories() {
@@ -51,14 +53,5 @@ public class CategoryRestController {
     public ResponseEntity<Void> deleteCategory(@PathVariable Long id) {
         categoryService.deleteCategory(id);
         return ResponseEntity.noContent().build();
-    }
-
-    @ExceptionHandler(NoSuchElementException.class)
-    public ResponseEntity<ProblemDetail> handleNoSuchElementException(NoSuchElementException exception,
-                                                                      Locale locale) {
-        return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                .body(ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND,
-                        messageSource.getMessage(exception.getMessage(), new Object[0],
-                                exception.getMessage(), locale)));
     }
 }

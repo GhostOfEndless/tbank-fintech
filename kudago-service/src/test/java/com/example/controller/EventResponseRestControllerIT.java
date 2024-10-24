@@ -1,7 +1,7 @@
 package com.example.controller;
 
 import com.example.BaseIT;
-import com.example.entity.Event;
+import com.example.client.dto.EventResponse;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.github.tomakehurst.wiremock.http.Fault;
 import com.github.tomakehurst.wiremock.junit5.WireMockExtension;
@@ -39,7 +39,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @Slf4j
 @Testcontainers
-public class EventRestControllerIT extends BaseIT {
+public class EventResponseRestControllerIT extends BaseIT {
 
     private static final String uri = "/api/v1/events";
 
@@ -87,7 +87,7 @@ public class EventRestControllerIT extends BaseIT {
         var mvcResponse = getResponse("/future", 200, MediaType.APPLICATION_JSON);
 
         var content = objectMapper.readValue(mvcResponse.getContentAsString(),
-                new TypeReference<List<Event>>() {
+                new TypeReference<List<EventResponse>>() {
                 });
 
         assertThat(content).isNotEmpty();
@@ -102,7 +102,7 @@ public class EventRestControllerIT extends BaseIT {
         var mvcResponse = getResponse("/reactive", 200, MediaType.APPLICATION_JSON);
 
         var content = objectMapper.readValue(mvcResponse.getContentAsString(),
-                new TypeReference<List<Event>>() {
+                new TypeReference<List<EventResponse>>() {
                 });
 
         assertThat(content).isNotEmpty();

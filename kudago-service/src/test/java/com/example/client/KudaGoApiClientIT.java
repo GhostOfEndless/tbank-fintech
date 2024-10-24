@@ -1,11 +1,10 @@
 package com.example.client;
 
+import com.example.BaseIT;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.junit.jupiter.Container;
@@ -14,13 +13,10 @@ import org.wiremock.integrations.testcontainers.WireMockContainer;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-
-@SpringBootTest
 @Testcontainers
-@ActiveProfiles("test")
 @DisplayName("Fetch data from API")
 @Tag("FetchData")
-public class KudaGoApiClientIT {
+public class KudaGoApiClientIT extends BaseIT {
 
     @Container
     static WireMockContainer wiremockServer = new WireMockContainer("wiremock/wiremock:2.35.1-1-alpine")

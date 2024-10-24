@@ -1,20 +1,38 @@
 package com.example.entity;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.*;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @SuperBuilder
-@Getter
 @Setter
+@Getter
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode(callSuper = false)
+@EqualsAndHashCode(callSuper = true)
+@Entity
+@Table(name = "t_locations", schema = "kudago")
 public class Location extends AbstractEntity {
 
-    @JsonProperty("slug")
+    @Column(name = "c_slug", nullable = false, unique = true)
     private String slug;
 
-    @JsonProperty("name")
+    @Column(name = "c_name", nullable = false)
     private String name;
+
+    @Builder.Default
+    @OneToMany(mappedBy = "location", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Event> events = new ArrayList<>();
 }
