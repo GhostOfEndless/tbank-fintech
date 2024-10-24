@@ -2,6 +2,7 @@ package com.example.controller;
 
 import com.example.aspect.LogExecutionTime;
 import com.example.exception.DateBoundsException;
+import com.example.exception.EntityNotFoundException;
 import com.example.exception.InvalidCurrencyException;
 import com.example.exception.ServiceUnavailableException;
 import jakarta.validation.ConstraintViolation;
@@ -20,6 +21,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import java.util.Locale;
+import java.util.NoSuchElementException;
 import java.util.Objects;
 
 @Slf4j
@@ -140,5 +142,23 @@ public class BadRequestControllerAdvice {
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
                 .body(problemDetail);
+    }
+
+    @ExceptionHandler(NoSuchElementException.class)
+    public ResponseEntity<ProblemDetail> handleNoSuchElementException(NoSuchElementException exception,
+                                                                       Locale locale) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND,
+                        messageSource.getMessage(exception.getMessage(), new Object[0],
+                                exception.getMessage(), locale)));
+    }
+
+    @ExceptionHandler(EntityNotFoundException.class)
+    public ResponseEntity<ProblemDetail> handleEntityNotFoundException(EntityNotFoundException exception,
+                                                                       Locale locale) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND,
+                        messageSource.getMessage(exception.getMessage(), new Object[]{exception.getId()},
+                                exception.getMessage(), locale)));
     }
 }

@@ -1,8 +1,10 @@
 package com.example.service;
 
 import com.example.client.KudaGoApiClient;
+import com.example.controller.dto.LocationDTO;
 import com.example.controller.payload.LocationPayload;
 import com.example.entity.Location;
+import com.example.exception.LocationNotFoundException;
 import com.example.repository.jpa.LocationRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -14,30 +16,79 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 @ExtendWith(MockitoExtension.class)
 public class LocationServiceTest {
 
-    @Mock
-    LocationRepository repository;
-
-    @Mock
-    KudaGoApiClient kudaGoApiClient;
-
-    @InjectMocks
-    LocationService service;
-
-    private final Location location = Location.builder()
+    private final LocationDTO locationDTO = LocationDTO.builder()
             .id(1L)
             .name("test")
             .slug("test")
             .build();
+
+    private final Location location = Location.builder()
+            .id(locationDTO.id())
+            .slug(locationDTO.slug())
+            .name(locationDTO.name())
+            .build();
+
+    @Mock
+    LocationRepository repository;
+    @Mock
+    KudaGoApiClient kudaGoApiClient;
+    @InjectMocks
+    LocationService service;
+
+    @Test
+    @Tag("Create")
+    @DisplayName("Should successfully create a new location")
+    public void createLocation_success() {
+        var payloadLocation = Location.builder()
+                .name(location.getName())
+                .slug(location.getSlug())
+                .build();
+
+        var savedLocation = Location.builder()
+                .id(location.getId())
+                .name(location.getName())
+                .slug(location.getSlug())
+                .build();
+
+        doReturn(savedLocation).when(repository).save(payloadLocation);
+
+        var newLocation = service.createLocation(payloadLocation.getSlug(), payloadLocation.getName());
+
+        assertAll(
+                () -> assertThat(newLocation.name()).isEqualTo(payloadLocation.getName()),
+                () -> assertThat(newLocation.slug()).isEqualTo(payloadLocation.getSlug())
+        );
+        verify(repository).save(payloadLocation);
+        verifyNoMoreInteractions(repository);
+    }
+
+    @Test
+    @Tag("Init")
+    @DisplayName("Should fetch locations from API during initialization")
+    public void init_invokesApi() {
+        var payload = LocationPayload.builder()
+                .name("test")
+                .slug("test")
+                .build();
+        doReturn(List.of(payload)).when(kudaGoApiClient).fetchLocations();
+
+        service.init();
+
+        verify(kudaGoApiClient).fetchLocations();
+        verifyNoMoreInteractions(kudaGoApiClient);
+    }
 
     @Nested
     @Tag("GetAll")
@@ -59,9 +110,9 @@ public class LocationServiceTest {
         public void getAllLocations_notEmpty() {
             doReturn(List.of(location)).when(repository).findAll();
 
-            var categories = service.getAllLocations();
+            var locations = service.getAllLocations();
 
-            assertThat(categories).contains(location);
+            assertThat(locations).contains(locationDTO);
         }
     }
 
@@ -77,33 +128,16 @@ public class LocationServiceTest {
 
             var receivedLocation = service.getLocationById(location.getId());
 
-            assertThat(receivedLocation).isEqualTo(location);
+            assertThat(receivedLocation).isEqualTo(locationDTO);
         }
 
         @Test
         @DisplayName("Should throw exception when location not found by ID")
         public void getById_notFound() {
-            assertThatExceptionOfType(NoSuchElementException.class)
+            assertThatExceptionOfType(LocationNotFoundException.class)
                     .isThrownBy(() -> service.getLocationById(location.getId()))
                     .withMessage("location.not_found");
         }
-    }
-
-    @Test
-    @Tag("Create")
-    @DisplayName("Should successfully create a new location")
-    public void createLocation_success() {
-        var payloadLocation = Location.builder()
-                .slug(location.getSlug())
-                .name(location.getName())
-                .build();
-        doReturn(location).when(repository).save(payloadLocation);
-
-        var savedLocation = service.createLocation(payloadLocation.getSlug(), payloadLocation.getName());
-
-        assertThat(savedLocation).isEqualTo(location);
-        verify(repository).save(payloadLocation);
-        verifyNoMoreInteractions(repository);
     }
 
     @Nested
@@ -119,13 +153,20 @@ public class LocationServiceTest {
                     .slug(location.getSlug())
                     .id(location.getId())
                     .build();
-            doReturn(true).when(repository).existsById(changedLocation.getId());
+
+            var changedLocationDTO = LocationDTO.builder()
+                    .name(location.getName() + "-updated")
+                    .slug(location.getSlug())
+                    .id(location.getId())
+                    .build();
+
+            doReturn(Optional.of(changedLocation)).when(repository).findById(changedLocation.getId());
             doReturn(changedLocation).when(repository).save(changedLocation);
 
-            var updatedCategory = service.updateLocation(location.getId(),
+            var updatedLocation = service.updateLocation(location.getId(),
                     changedLocation.getSlug(), changedLocation.getName());
 
-            assertThat(changedLocation).isEqualTo(updatedCategory);
+            assertThat(changedLocationDTO).isEqualTo(updatedLocation);
             verify(repository).save(changedLocation);
             verifyNoMoreInteractions(repository);
         }
@@ -138,9 +179,9 @@ public class LocationServiceTest {
                     .slug(location.getSlug())
                     .id(location.getId())
                     .build();
-            doReturn(false).when(repository).existsById(changedLocation.getId());
+            doReturn(Optional.empty()).when(repository).findById(changedLocation.getId());
 
-            assertThatExceptionOfType(NoSuchElementException.class)
+            assertThatExceptionOfType(LocationNotFoundException.class)
                     .isThrownBy(() -> service.updateLocation(
                             location.getId(),
                             changedLocation.getSlug(),
@@ -170,25 +211,9 @@ public class LocationServiceTest {
         public void deleteLocation_notFound() {
             doReturn(false).when(repository).existsById(location.getId());
 
-            assertThatExceptionOfType(NoSuchElementException.class)
+            assertThatExceptionOfType(LocationNotFoundException.class)
                     .isThrownBy(() -> service.deleteLocation(location.getId()))
                     .withMessage("location.not_found");
         }
-    }
-
-    @Test
-    @Tag("Init")
-    @DisplayName("Should fetch locations from API during initialization")
-    public void init_invokesApi() {
-        var payload = LocationPayload.builder()
-                .name("test")
-                .slug("test")
-                .build();
-        doReturn(List.of(payload)).when(kudaGoApiClient).fetchLocations();
-
-        service.init();
-
-        verify(kudaGoApiClient).fetchLocations();
-        verifyNoMoreInteractions(kudaGoApiClient);
     }
 }

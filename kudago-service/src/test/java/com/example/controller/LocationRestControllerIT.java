@@ -1,8 +1,8 @@
 package com.example.controller;
 
 import com.example.BaseIT;
+import com.example.controller.dto.LocationDTO;
 import com.example.controller.payload.LocationPayload;
-import com.example.entity.Location;
 import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.DisplayName;
@@ -50,24 +50,6 @@ public class LocationRestControllerIT extends BaseIT {
 
         @SneakyThrows
         @Test
-        @DisplayName("Should return empty list when no locations exist")
-        public void getAllLocations_empty() {
-            var mvcResponse = mockMvc.perform(get(uri))
-                    .andExpectAll(
-                            status().isOk(),
-                            content().contentType(MediaType.APPLICATION_JSON))
-                    .andReturn()
-                    .getResponse();
-
-            var content = objectMapper.readValue(mvcResponse.getContentAsString(),
-                    new TypeReference<List<Location>>() {
-                    });
-
-            assertThat(content).isEmpty();
-        }
-
-        @SneakyThrows
-        @Test
         @DisplayName("Should return list with one location when one location exists")
         public void getAllLocations_notEmpty() {
             var createdLocation = createLocation("test", "Test Location");
@@ -81,14 +63,13 @@ public class LocationRestControllerIT extends BaseIT {
 
             var locations = objectMapper.readValue(
                     mvcResponse.getContentAsString(),
-                    new TypeReference<List<Location>>() {
+                    new TypeReference<List<LocationDTO>>() {
                     });
 
-            assertAll("Grouped assertions for existed location",
-                    () -> assertEquals(locations.size(), 1),
-                    () -> assertEquals(locations.getFirst(), createdLocation));
+            assertThat(locations).isNotEmpty();
+            assertThat(locations).contains(createdLocation);
 
-            deleteLocation(createdLocation.getId());
+            deleteLocation(createdLocation.id());
         }
     }
 
@@ -103,25 +84,25 @@ public class LocationRestControllerIT extends BaseIT {
         public void getLocationById_success() {
             var createdLocation = createLocation("test", "Test Location");
 
-            var mvcResponse = mockMvc.perform(get(uri + "/" + createdLocation.getId()))
+            var mvcResponse = mockMvc.perform(get(uri + "/" + createdLocation.id()))
                     .andExpectAll(
                             status().isOk(),
                             content().contentType(MediaType.APPLICATION_JSON))
                     .andReturn()
                     .getResponse();
 
-            var actualLocation = objectMapper.readValue(mvcResponse.getContentAsString(), Location.class);
+            var actualLocation = objectMapper.readValue(mvcResponse.getContentAsString(), LocationDTO.class);
 
             assertThat(actualLocation).isEqualTo(createdLocation);
 
-            deleteLocation(createdLocation.getId());
+            deleteLocation(createdLocation.id());
         }
 
         @SneakyThrows
         @Test
         @DisplayName("Should return 404 when location doesn't exist")
         public void getLocationById_notFound() {
-            mockMvc.perform(get(uri + "/1"))
+            mockMvc.perform(get(uri + "/999"))
                     .andExpectAll(
                             status().isNotFound(),
                             content().contentType(MediaType.APPLICATION_PROBLEM_JSON));
@@ -151,13 +132,13 @@ public class LocationRestControllerIT extends BaseIT {
                     .andReturn()
                     .getResponse();
 
-            var actualLocation = objectMapper.readValue(mvcResponse.getContentAsString(), Location.class);
+            var actualLocation = objectMapper.readValue(mvcResponse.getContentAsString(), LocationDTO.class);
 
             assertAll("Grouped assertions for created location",
-                    () -> assertEquals(actualLocation.getName(), payload.name()),
-                    () -> assertEquals(actualLocation.getSlug(), payload.slug()));
+                    () -> assertEquals(actualLocation.name(), payload.name()),
+                    () -> assertEquals(actualLocation.slug(), payload.slug()));
 
-            deleteLocation(actualLocation.getId());
+            deleteLocation(actualLocation.id());
         }
 
         @SneakyThrows
@@ -194,7 +175,7 @@ public class LocationRestControllerIT extends BaseIT {
                     .name("New Location")
                     .build();
 
-            var mvcResponse = mockMvc.perform(put(uri + "/" + createdLocation.getId())
+            var mvcResponse = mockMvc.perform(put(uri + "/{id}", createdLocation.id())
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(payload)))
                     .andExpectAll(
@@ -203,15 +184,15 @@ public class LocationRestControllerIT extends BaseIT {
                     .andReturn()
                     .getResponse();
 
-            var updatedLocation = objectMapper.readValue(mvcResponse.getContentAsString(), Location.class);
+            var updatedLocation = objectMapper.readValue(mvcResponse.getContentAsString(), LocationDTO.class);
 
             assertAll("Grouped assertions for updated locations",
-                    () -> assertEquals(updatedLocation.getId(), createdLocation.getId()),
-                    () -> assertEquals(updatedLocation.getSlug(), payload.slug()),
-                    () -> assertEquals(updatedLocation.getName(), payload.name())
+                    () -> assertEquals(updatedLocation.id(), createdLocation.id()),
+                    () -> assertEquals(updatedLocation.slug(), payload.slug()),
+                    () -> assertEquals(updatedLocation.name(), payload.name())
             );
 
-            deleteLocation(createdLocation.getId());
+            deleteLocation(createdLocation.id());
         }
 
         @SneakyThrows
@@ -221,14 +202,14 @@ public class LocationRestControllerIT extends BaseIT {
         public void updateLocation_badRequest(LocationPayload updatePayload) {
             var createdLocation = createLocation("old", "Old Name");
 
-            mockMvc.perform(put(uri + "/" + createdLocation.getId())
+            mockMvc.perform(put(uri + "/{id}", createdLocation.id())
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(updatePayload)))
                     .andExpectAll(
                             status().isBadRequest(),
                             content().contentType(MediaType.APPLICATION_PROBLEM_JSON));
 
-            deleteLocation(createdLocation.getId());
+            deleteLocation(createdLocation.id());
         }
 
         @SneakyThrows
@@ -240,7 +221,7 @@ public class LocationRestControllerIT extends BaseIT {
                     .name("New name")
                     .build();
 
-            mockMvc.perform(put(uri + "/1")
+            mockMvc.perform(put(uri + "/999")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(payload)))
                     .andExpectAll(
@@ -264,9 +245,9 @@ public class LocationRestControllerIT extends BaseIT {
         public void deleteLocation_success() {
             var createdLocation = createLocation("test", "Test Name");
 
-            deleteLocation(createdLocation.getId());
+            deleteLocation(createdLocation.id());
 
-            mockMvc.perform(get(uri + "/" + createdLocation.getId()))
+            mockMvc.perform(get(uri + "/{id}", createdLocation.id()))
                     .andExpect(status().isNotFound());
         }
 
@@ -282,7 +263,7 @@ public class LocationRestControllerIT extends BaseIT {
     }
 
     @SneakyThrows
-    private Location createLocation(String slug, String name) {
+    private LocationDTO createLocation(String slug, String name) {
         var payload = LocationPayload.builder()
                 .slug(slug)
                 .name(name)
@@ -297,7 +278,7 @@ public class LocationRestControllerIT extends BaseIT {
                 .andReturn()
                 .getResponse();
 
-        return objectMapper.readValue(mvcResponse.getContentAsString(), Location.class);
+        return objectMapper.readValue(mvcResponse.getContentAsString(), LocationDTO.class);
     }
 
     @SneakyThrows

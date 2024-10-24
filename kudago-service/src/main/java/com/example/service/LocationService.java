@@ -1,14 +1,15 @@
 package com.example.service;
 
 import com.example.client.KudaGoApiClient;
+import com.example.controller.dto.LocationDTO;
 import com.example.entity.Location;
+import com.example.exception.LocationNotFoundException;
 import com.example.repository.jpa.LocationRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.NoSuchElementException;
 
 @Slf4j
 @Service
@@ -33,33 +34,41 @@ public class LocationService {
         log.info("Locations added!");
     }
 
-    public List<Location> getAllLocations() {
-        return locationRepository.findAll();
+    public List<LocationDTO> getAllLocations() {
+        return locationRepository.findAll().stream().map(location ->
+                new LocationDTO(location.getId(), location.getSlug(), location.getName())).toList();
     }
 
-    public Location getLocationById(Long id) {
-        return locationRepository.findById(id).orElseThrow(() ->
-                new NoSuchElementException("location.not_found"));
+    public LocationDTO getLocationById(Long id) {
+        var location = locationRepository.findById(id).orElseThrow(() ->
+                new LocationNotFoundException(id));
+
+        return new LocationDTO(location.getId(), location.getSlug(), location.getName());
     }
 
-    public Location createLocation(String slug, String name) {
-        return locationRepository.save(
+    public LocationDTO createLocation(String slug, String name) {
+        var location = locationRepository.save(
                 Location.builder()
                         .slug(slug)
                         .name(name)
                         .build());
+
+        return new LocationDTO(location.getId(), location.getSlug(), location.getName());
     }
 
-    public Location updateLocation(Long id, String slug, String name) {
-        if (locationRepository.existsById(id)) {
-            return locationRepository.save(
+    public LocationDTO updateLocation(Long id, String slug, String name) {
+            var oldLocation = locationRepository.findById(id)
+                    .orElseThrow(() -> new LocationNotFoundException(id));
+
+            var location = locationRepository.save(
                     Location.builder()
                             .id(id)
                             .slug(slug)
                             .name(name)
+                            .events(oldLocation.getEvents())
                             .build());
-        }
-        throw new NoSuchElementException("location.not_found");
+
+            return new LocationDTO(location.getId(), location.getSlug(), location.getName());
     }
 
     public void deleteLocation(Long id) {
@@ -67,6 +76,6 @@ public class LocationService {
             locationRepository.deleteById(id);
             return;
         }
-        throw new NoSuchElementException("location.not_found");
+        throw new LocationNotFoundException(id);
     }
 }

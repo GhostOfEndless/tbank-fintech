@@ -7,7 +7,6 @@ import com.example.controller.payload.LocationPayload;
 import com.example.exception.ServiceUnavailableException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.EnableRetry;
 import org.springframework.retry.annotation.Retryable;
@@ -80,7 +79,7 @@ public class KudaGoApiClient {
         });
     }
 
-    private @NotNull <T> List<T> fetchData(String uri, Class<T[]> responseType) {
+    private <T> List<T> fetchData(String uri, Class<T[]> responseType) {
         log.debug("Start request");
         var response = kudaGoWebClient.get()
                 .uri(uri)
@@ -101,6 +100,8 @@ public class KudaGoApiClient {
         return getEventsFromPage(dateFrom, dateTo, location, page)
                 .onErrorResume(WebClientResponseException.NotFound.class,
                         error -> Mono.just(new EventsResponse()))
+                .onErrorResume(WebClientResponseException.BadRequest.class,
+                        error -> Mono.just(new EventsResponse()))
                 .onErrorResume(WebClientResponseException.ServiceUnavailable.class,
                         error -> Mono.error(new ServiceUnavailableException()))
                 .onErrorResume(WebClientRequestException.class,
@@ -112,7 +113,7 @@ public class KudaGoApiClient {
         return getEventsFromPage(dateFrom, dateTo, location, page)
                 .toFuture()
                 .exceptionally(throwable -> {
-                    if (throwable instanceof WebClientResponseException.NotFound) {
+                    if (throwable instanceof WebClientResponseException) {
                         return new EventsResponse();
                     }
                     log.error("Error occurred while data fetch from API");
@@ -127,6 +128,7 @@ public class KudaGoApiClient {
                         .queryParam("actual_since", dateFrom.toString())
                         .queryParam("actual_until", dateTo.toString())
                         .queryParam("page", page)
+                        .queryParam("page_size", 100)
                         .queryParam("order_by", "is_free,price")
                         .queryParam("text_format", "text")
                         .queryParam("location", location)

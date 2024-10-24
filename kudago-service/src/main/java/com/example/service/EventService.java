@@ -1,15 +1,14 @@
 package com.example.service;
 
-
 import com.example.client.CurrencyServiceApiClient;
 import com.example.client.KudaGoApiClient;
 import com.example.client.dto.EventResponse;
 import com.example.entity.Event;
 import com.example.exception.DateBoundsException;
 import com.example.repository.jpa.EventRepository;
+import com.example.repository.jpa.LocationRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
@@ -28,12 +27,12 @@ public class EventService {
 
     private final KudaGoApiClient kudaGoApiClient;
     private final CurrencyServiceApiClient currencyApiClient;
-    private final LocationService locationService;
+    private final LocationRepository locationRepository;
     private final EventRepository eventRepository;
 
     public void init() {
         var dateBound = buildDateBounds(null, null);
-        var locations = locationService.getAllLocations();
+        var locations = locationRepository.findAll();
 
         locations.forEach(location ->
                 kudaGoApiClient.getEventsFuture(dateBound.from(), dateBound.to(), location.getSlug())
@@ -43,18 +42,19 @@ public class EventService {
                                     .id(eventResponse.getId())
                                     .name(eventResponse.getTitle())
                                     .location(location)
-                                    .startDate(eventResponse.getDates().getFirst().getStart())
+                                    .startDate(eventResponse.getDates().getLast().getStart())
                                     .price(eventResponse.getPrice())
                                     .free(eventResponse.isFree())
                                     .build();
 
-                            if (eventRepository.existsById(event.getId())) {
+                            if (!eventRepository.existsById(event.getId())) {
                                 eventRepository.save(event);
                             }
-                        }));
+                        })
+        );
     }
 
-    public Mono<List<EventResponse>> fetchEventsReactive(@NotNull Float budget, @NotNull String currencyCode,
+    public Mono<List<EventResponse>> fetchEventsReactive(Float budget, String currencyCode,
                                                          LocalDate dateFrom, LocalDate dateTo, String location) {
         var dateBounds = buildDateBounds(dateFrom, dateTo);
 
@@ -72,7 +72,7 @@ public class EventService {
     }
 
     @Async("asyncExecutor")
-    public CompletableFuture<List<EventResponse>> fetchEventsFuture(@NotNull Float budget, @NotNull String currencyCode,
+    public CompletableFuture<List<EventResponse>> fetchEventsFuture(Float budget, String currencyCode,
                                                                     LocalDate dateFrom, LocalDate dateTo,
                                                                     String location) {
         var dateBounds = buildDateBounds(dateFrom, dateTo);
