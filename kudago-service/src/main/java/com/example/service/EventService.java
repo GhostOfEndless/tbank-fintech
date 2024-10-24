@@ -109,7 +109,7 @@ public class EventService {
                 .orElseThrow(() -> new EventNotfoundException(id)));
     }
 
-    public List<EventDTO> getLocationWithEventsId(Long locationId) {
+    public List<EventDTO> getLocationWithEvents(Long locationId) {
         var location = locationRepository.findByIdWithEvents(locationId)
                 .orElseThrow(() -> new LocationNotFoundException(locationId));
 

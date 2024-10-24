@@ -4,9 +4,11 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import lombok.Builder;
 
 import java.time.Instant;
 
+@Builder
 public record EventPayload(
         @NotBlank(message = "{event.request.name.is_blank}")
         String name,

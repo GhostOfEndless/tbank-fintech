@@ -50,7 +50,7 @@ public class LocationRestControllerIT extends BaseIT {
 
         @SneakyThrows
         @Test
-        @DisplayName("Should return list with one location when one location exists")
+        @DisplayName("Should return list with at least one location when one location exists")
         public void getAllLocations_notEmpty() {
             var createdLocation = createLocation("test", "Test Location");
 

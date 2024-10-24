@@ -5,6 +5,7 @@ import com.example.controller.payload.EventPayload;
 import com.example.service.EventService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -33,12 +34,13 @@ public class LocationEventsRestController {
 
     @GetMapping
     public List<EventDTO> getEventsByLocationId(@RequestParam Long locationId) {
-        return eventService.getLocationWithEventsId(locationId);
+        return eventService.getLocationWithEvents(locationId);
     }
 
     @PostMapping
-    public EventDTO createEvent(@Valid @RequestBody EventPayload payload) {
-        return eventService.create(payload);
+    public ResponseEntity<EventDTO> createEvent(@Valid @RequestBody EventPayload payload) {
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(eventService.create(payload));
     }
 
     @PatchMapping("/{id}")

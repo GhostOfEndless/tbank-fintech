@@ -17,20 +17,16 @@ public class EventSpecifications {
         return (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
 
-            // Добавляем JOIN для избежания N+1
             root.fetch("location", JoinType.LEFT);
 
-            // Поиск по имени (игнорируя регистр)
             if (name != null && !name.isEmpty()) {
                 predicates.add(cb.like(cb.lower(root.get("name")), "%" + name.toLowerCase() + "%"));
             }
 
-            // Поиск по локации
             if (location != null) {
                 predicates.add(cb.equal(root.get("location"), location));
             }
 
-            // Поиск по диапазону дат
             if (fromDate != null && toDate != null) {
                 predicates.add(cb.between(root.get("startDate"), fromDate, toDate));
             } else if (fromDate != null) {
