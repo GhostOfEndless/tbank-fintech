@@ -1,60 +1,41 @@
 package com.example.entity;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.AllArgsConstructor;
-import lombok.Data;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.experimental.SuperBuilder;
 
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.time.Instant;
 
-@Schema(description = "Информация о мероприятии")
-@Data
-@AllArgsConstructor
-public class Event {
+@SuperBuilder
+@Setter
+@Getter
+@NoArgsConstructor
+@EqualsAndHashCode(callSuper = true)
+@Entity
+@Table(name = "t_events", schema = "kudago")
+public class Event extends AbstractEntity {
 
-    private static final Pattern PRICE_PATTERN = Pattern.compile("\\d+(?:\\s?\\d+)*");
+    @Column(name = "c_name", nullable = false)
+    private String name;
 
-    @Schema(description = "Уникальный идентификатор мероприятия")
-    private Long id;
+    @Column(name = "c_start_date", nullable = false)
+    private Instant startDate;
 
-    @Schema(description = "Название мероприятия")
-    private String title;
-
-    @Schema(description = "Цена мероприятия в виде строки")
+    @Column(name = "c_price")
     private String price;
 
-    @Schema(description = "Признак бесплатного мероприятия")
-    @JsonProperty("is_free")
-    private boolean isFree;
+    @Column(name = "c_free", nullable = false)
+    private boolean free;
 
-    public boolean isFitsBudget(Float budget) {
-        if (isFree) {
-            return true;
-        }
-
-        if (price == null || price.isEmpty()) {
-            return false;
-        }
-
-        Integer extractedPrice = extractPrice(price);
-        if (extractedPrice == null) {
-            return false;
-        }
-
-        return extractedPrice <= budget;
-    }
-
-    private Integer extractPrice(String priceString) {
-        Matcher matcher = PRICE_PATTERN.matcher(priceString);
-        if (matcher.find()) {
-            try {
-                String priceStr = matcher.group().replaceAll("\\s", "");
-                return Integer.parseInt(priceStr);
-            } catch (NumberFormatException e) {
-                // Игнорируем некорректные числа
-            }
-        }
-        return null;
-    }
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "c_location_id", nullable = false)
+    private Location location;
 }

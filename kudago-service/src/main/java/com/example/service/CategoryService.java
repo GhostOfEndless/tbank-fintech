@@ -2,7 +2,7 @@ package com.example.service;
 
 import com.example.client.KudaGoApiClient;
 import com.example.entity.Category;
-import com.example.repository.CategoryRepository;
+import com.example.repository.inmemory.CategoryInMemoryRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -15,7 +15,7 @@ import java.util.NoSuchElementException;
 @RequiredArgsConstructor
 public class CategoryService {
 
-    private final CategoryRepository repository;
+    private final CategoryInMemoryRepository repository;
     private final KudaGoApiClient kudaGoApiClient;
 
     public void init() {

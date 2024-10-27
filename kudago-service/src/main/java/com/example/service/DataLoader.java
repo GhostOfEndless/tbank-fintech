@@ -23,6 +23,7 @@ public class DataLoader {
 
     private final CategoryService categoryService;
     private final LocationService locationService;
+    private final EventService eventService;
     private final ExecutorService dataLoaderThreadPool;
     private final ScheduledExecutorService scheduledDataInitPool;
     private final Duration dataInitSchedule;
@@ -48,6 +49,7 @@ public class DataLoader {
 
         dataLoaderThreadPool.submit(() -> {
             locationService.init();
+            eventService.init();
             latch.countDown();
         });
 

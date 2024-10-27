@@ -1,4 +1,4 @@
-package com.example.repository;
+package com.example.repository.inmemory;
 
 import java.util.List;
 import java.util.Optional;

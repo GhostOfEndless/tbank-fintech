@@ -6,7 +6,6 @@ import com.example.exception.ServiceUnavailableException;
 import com.example.exception.InvalidCurrencyException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.BodyInserters;
@@ -24,7 +23,7 @@ public class CurrencyServiceApiClient {
 
     private final WebClient currencyWebClient;
 
-    public Mono<Float> convertBudgetToRublesReactive(@NotNull Float budget, @NotNull String currency) {
+    public Mono<Float> convertBudgetToRublesReactive(Float budget, String currency) {
         return currencyWebClient.post()
                 .uri("/convert")
                 .body(BodyInserters.fromValue(
@@ -40,7 +39,7 @@ public class CurrencyServiceApiClient {
                 .map(ConvertCurrencyResponse::convertedAmount);
     }
 
-    public CompletableFuture<Float> convertBudgetToRublesFuture(@NotNull Float budget, @NotNull String currency) {
+    public CompletableFuture<Float> convertBudgetToRublesFuture(Float budget, String currency) {
         return currencyWebClient.post()
                 .uri("/convert")
                 .body(BodyInserters.fromValue(
@@ -57,7 +56,7 @@ public class CurrencyServiceApiClient {
                 });
     }
 
-    private ConvertCurrencyRequest makeConvertRequest(@NotNull Float budget, @NotNull String currency) {
+    private ConvertCurrencyRequest makeConvertRequest(Float budget, String currency) {
         return ConvertCurrencyRequest.builder()
                 .toCurrency("RUB")
                 .fromCurrency(currency.toUpperCase())
