@@ -4,7 +4,6 @@
 CREATE SCHEMA IF NOT EXISTS kudago;
 
 --changeset ghostofendless:2
-CREATE SEQUENCE IF NOT EXISTS kudago.id_table_seq START WITH 1 INCREMENT BY 50 CACHE 50 NO CYCLE;
 CREATE SEQUENCE IF NOT EXISTS kudago.events_seq START WITH 1 INCREMENT BY 50 CACHE 50 NO CYCLE;
 CREATE SEQUENCE IF NOT EXISTS kudago.locations_seq START WITH 1 INCREMENT BY 50 CACHE 50 NO CYCLE;
 CREATE SEQUENCE IF NOT EXISTS kudago.categories_seq START WITH 1 INCREMENT BY 50 CACHE 50 NO CYCLE;
@@ -40,4 +39,30 @@ CREATE TABLE kudago.t_categories
     id     BIGINT DEFAULT nextval('kudago.categories_seq') PRIMARY KEY,
     c_slug TEXT NOT NULL UNIQUE,
     c_name TEXT NOT NULL
+);
+
+--changeset ghostofendless:7
+CREATE SEQUENCE IF NOT EXISTS kudago.categories_history_seq START WITH 1 INCREMENT BY 50 CACHE 50 NO CYCLE;
+CREATE SEQUENCE IF NOT EXISTS kudago.locations_history_seq START WITH 1 INCREMENT BY 50 CACHE 50 NO CYCLE;
+
+--changeset ghostofendless:8
+CREATE TABLE kudago.t_categories_history
+(
+    id            BIGINT DEFAULT nextval('kudago.categories_history_seq') PRIMARY KEY,
+    c_category_id BIGINT    NOT NULL,
+    c_slug        TEXT      NOT NULL,
+    c_name        TEXT      NOT NULL,
+    c_timestamp   TIMESTAMP NOT NULL,
+    c_action      TEXT      NOT NULL
+);
+
+--changeset ghostofendless:9
+CREATE TABLE kudago.t_locations_history
+(
+    id            BIGINT DEFAULT nextval('kudago.locations_history_seq') PRIMARY KEY,
+    c_location_id BIGINT    NOT NULL,
+    c_slug        TEXT      NOT NULL,
+    c_name        TEXT      NOT NULL,
+    c_timestamp   TIMESTAMP NOT NULL,
+    c_action      TEXT      NOT NULL
 );

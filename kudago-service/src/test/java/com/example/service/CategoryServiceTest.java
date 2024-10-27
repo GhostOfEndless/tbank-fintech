@@ -4,7 +4,7 @@ import com.example.client.KudaGoApiClient;
 import com.example.controller.payload.CategoryPayload;
 import com.example.entity.Category;
 import com.example.exception.entity.CategoryNotFoundException;
-import com.example.repository.jpa.CategoryRepository;
+import com.example.repository.CategoryRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Tag;
@@ -25,6 +25,10 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 @ExtendWith(MockitoExtension.class)
 public class CategoryServiceTest {
+
+    @SuppressWarnings("unused")
+    @Mock
+    CategoryHistoryCaretaker historyCaretaker;
 
     @Mock
     CategoryRepository repository;
@@ -187,7 +191,20 @@ public class CategoryServiceTest {
                 .name("test")
                 .slug("test")
                 .build();
+
+        var categoryForSave = Category.builder()
+                .slug(payload.slug())
+                .name(payload.name())
+                .build();
+
+        var savedCategory = Category.builder()
+                .id(1L)
+                .slug(payload.slug())
+                .name(payload.name())
+                .build();
+
         doReturn(List.of(payload)).when(kudaGoApiClient).fetchCategories();
+        doReturn(savedCategory).when(repository).save(categoryForSave);
 
         service.init();
 

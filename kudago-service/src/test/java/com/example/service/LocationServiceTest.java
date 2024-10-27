@@ -5,7 +5,7 @@ import com.example.controller.dto.LocationDTO;
 import com.example.controller.payload.LocationPayload;
 import com.example.entity.Location;
 import com.example.exception.entity.LocationNotFoundException;
-import com.example.repository.jpa.LocationRepository;
+import com.example.repository.LocationRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Tag;
@@ -42,8 +42,14 @@ public class LocationServiceTest {
 
     @Mock
     LocationRepository repository;
+
+    @SuppressWarnings("unused")
+    @Mock
+    LocationHistoryCaretaker historyCaretaker;
+
     @Mock
     KudaGoApiClient kudaGoApiClient;
+
     @InjectMocks
     LocationService service;
 
@@ -82,7 +88,20 @@ public class LocationServiceTest {
                 .name("test")
                 .slug("test")
                 .build();
+
+        var locationForSave = Location.builder()
+                .slug(payload.slug())
+                .name(payload.name())
+                .build();
+
+        var savedLocation = Location.builder()
+                .id(1L)
+                .slug(payload.slug())
+                .name(payload.name())
+                .build();
+
         doReturn(List.of(payload)).when(kudaGoApiClient).fetchLocations();
+        doReturn(savedLocation).when(repository).save(locationForSave);
 
         service.init();
 
