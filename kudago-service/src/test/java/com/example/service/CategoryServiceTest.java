@@ -3,7 +3,8 @@ package com.example.service;
 import com.example.client.KudaGoApiClient;
 import com.example.controller.payload.CategoryPayload;
 import com.example.entity.Category;
-import com.example.repository.inmemory.CategoryInMemoryRepository;
+import com.example.exception.entity.CategoryNotFoundException;
+import com.example.repository.jpa.CategoryRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Tag;
@@ -14,18 +15,19 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 @ExtendWith(MockitoExtension.class)
 public class CategoryServiceTest {
 
     @Mock
-    CategoryInMemoryRepository repository;
+    CategoryRepository repository;
 
     @Mock
     KudaGoApiClient kudaGoApiClient;
@@ -83,7 +85,7 @@ public class CategoryServiceTest {
         @Test
         @DisplayName("Should throw exception when category not found by ID")
         public void getById_notFound() {
-            assertThatExceptionOfType(NoSuchElementException.class)
+            assertThatExceptionOfType(CategoryNotFoundException.class)
                     .isThrownBy(() -> service.getCategoryById(category.getId()))
                     .withMessage("category.not_found");
         }
@@ -120,7 +122,7 @@ public class CategoryServiceTest {
                     .slug(category.getSlug())
                     .id(category.getId())
                     .build();
-            doReturn(true).when(repository).existsById(changedCategory.getId());
+            doReturn(Optional.of(category)).when(repository).findById(changedCategory.getId());
             doReturn(changedCategory).when(repository).save(changedCategory);
 
             var updatedCategory = service.updateCategory(category.getId(),
@@ -139,9 +141,9 @@ public class CategoryServiceTest {
                     .slug(category.getSlug())
                     .id(category.getId())
                     .build();
-            doReturn(false).when(repository).existsById(changedCategory.getId());
+            doReturn(Optional.empty()).when(repository).findById(changedCategory.getId());
 
-            assertThatExceptionOfType(NoSuchElementException.class)
+            assertThatExceptionOfType(CategoryNotFoundException.class)
                     .isThrownBy(() -> service.updateCategory(
                             category.getId(),
                             changedCategory.getSlug(),
@@ -158,20 +160,20 @@ public class CategoryServiceTest {
         @Test
         @DisplayName("Should successfully delete an existing category")
         public void deleteCategory_success() {
-            doReturn(true).when(repository).existsById(category.getId());
+            doReturn(Optional.of(category)).when(repository).findById(category.getId());
 
             service.deleteCategory(category.getId());
 
-            verify(repository).delete(category.getId());
+            verify(repository).deleteById(category.getId());
             verifyNoMoreInteractions(repository);
         }
 
         @Test
         @DisplayName("Should throw exception when deleting non-existent category")
         public void deleteCategory_notFound() {
-            doReturn(false).when(repository).existsById(category.getId());
+            doReturn(Optional.empty()).when(repository).findById(category.getId());
 
-            assertThatExceptionOfType(NoSuchElementException.class)
+            assertThatExceptionOfType(CategoryNotFoundException.class)
                     .isThrownBy(() -> service.deleteCategory(category.getId()))
                     .withMessage("category.not_found");
         }

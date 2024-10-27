@@ -69,10 +69,7 @@ public class LocationService {
     }
 
     public void deleteLocation(Long id) {
-        if (locationRepository.existsById(id)) {
-            locationRepository.deleteById(id);
-            return;
-        }
-        throw new LocationNotFoundException(id);
+        getLocationById(id);
+        locationRepository.deleteById(id);
     }
 }

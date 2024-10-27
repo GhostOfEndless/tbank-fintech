@@ -198,7 +198,7 @@ public class LocationServiceTest {
         @Test
         @DisplayName("Should successfully delete an existing location")
         public void deleteLocation_success() {
-            doReturn(true).when(repository).existsById(location.getId());
+            doReturn(Optional.of(location)).when(repository).findById(location.getId());
 
             service.deleteLocation(location.getId());
 
@@ -209,7 +209,7 @@ public class LocationServiceTest {
         @Test
         @DisplayName("Should throw exception when deleting non-existent location")
         public void deleteLocation_notFound() {
-            doReturn(false).when(repository).existsById(location.getId());
+            doReturn(Optional.empty()).when(repository).findById(location.getId());
 
             assertThatExceptionOfType(LocationNotFoundException.class)
                     .isThrownBy(() -> service.deleteLocation(location.getId()))

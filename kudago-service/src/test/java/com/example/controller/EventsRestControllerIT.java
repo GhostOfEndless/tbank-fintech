@@ -39,7 +39,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @Slf4j
 @Testcontainers
-public class EventResponseRestControllerIT extends BaseIT {
+public class EventsRestControllerIT extends BaseIT {
 
     private static final String uri = "/api/v1/events";
 

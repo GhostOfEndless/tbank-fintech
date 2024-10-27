@@ -2,45 +2,48 @@ package com.example.service;
 
 import com.example.client.KudaGoApiClient;
 import com.example.entity.Category;
-import com.example.repository.inmemory.CategoryInMemoryRepository;
+import com.example.exception.entity.CategoryNotFoundException;
+import com.example.repository.jpa.CategoryRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.NoSuchElementException;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class CategoryService {
 
-    private final CategoryInMemoryRepository repository;
+    private final CategoryRepository categoryRepository;
     private final KudaGoApiClient kudaGoApiClient;
 
     public void init() {
-        repository.deleteAll();
         log.info("Fetching categories from API...");
         kudaGoApiClient.fetchCategories()
-                .forEach(payload -> repository.save(
-                        Category.builder()
-                                .slug(payload.slug())
-                                .name(payload.name())
-                                .build()));
+                .forEach(payload -> {
+                    if (!categoryRepository.existsBySlug(payload.slug())) {
+                        categoryRepository.save(
+                                Category.builder()
+                                        .slug(payload.slug())
+                                        .name(payload.name())
+                                        .build());
+                    }
+                });
         log.info("Categories added!");
     }
 
     public List<Category> getAllCategories() {
-        return repository.findAll();
+        return categoryRepository.findAll();
     }
 
     public Category getCategoryById(Long id) {
-        return repository.findById(id).orElseThrow(() ->
-                new NoSuchElementException("category.not_found"));
+        return categoryRepository.findById(id).orElseThrow(() ->
+                new CategoryNotFoundException(id));
     }
 
     public Category createCategory(String slug, String name) {
-        return repository.save(
+        return categoryRepository.save(
                 Category.builder()
                         .slug(slug)
                         .name(name)
@@ -48,22 +51,16 @@ public class CategoryService {
     }
 
     public Category updateCategory(Long id, String slug, String name) {
-        if (repository.existsById(id)) {
-            return repository.save(
-                    Category.builder()
-                            .id(id)
-                            .slug(slug)
-                            .name(name)
-                            .build());
-        }
-        throw new NoSuchElementException("category.not_found");
+        var category = getCategoryById(id);
+
+        category.setName(name);
+        category.setSlug(slug);
+
+        return categoryRepository.save(category);
     }
 
     public void deleteCategory(Long id) {
-        if (repository.existsById(id)) {
-            repository.delete(id);
-            return;
-        }
-        throw new NoSuchElementException("category.not_found");
+        getCategoryById(id);
+        categoryRepository.deleteById(id);
     }
 }
