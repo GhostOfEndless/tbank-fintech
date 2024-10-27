@@ -1,6 +1,7 @@
 package com.example.repository.specification;
 
 import com.example.entity.Event;
+import com.example.entity.Event_;
 import com.example.entity.Location;
 import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Predicate;
@@ -17,22 +18,22 @@ public class EventSpecifications {
         return (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
 
-            root.fetch("location", JoinType.LEFT);
+            root.fetch(Event_.location, JoinType.LEFT);
 
             if (name != null && !name.isEmpty()) {
-                predicates.add(cb.like(cb.lower(root.get("name")), "%" + name.toLowerCase() + "%"));
+                predicates.add(cb.like(cb.lower(root.get(Event_.name)), "%" + name.toLowerCase() + "%"));
             }
 
             if (location != null) {
-                predicates.add(cb.equal(root.get("location"), location));
+                predicates.add(cb.equal(root.get(Event_.location), location));
             }
 
             if (fromDate != null && toDate != null) {
-                predicates.add(cb.between(root.get("startDate"), fromDate, toDate));
+                predicates.add(cb.between(root.get(Event_.startDate), fromDate, toDate));
             } else if (fromDate != null) {
-                predicates.add(cb.greaterThanOrEqualTo(root.get("startDate"), fromDate));
+                predicates.add(cb.greaterThanOrEqualTo(root.get(Event_.startDate), fromDate));
             } else if (toDate != null) {
-                predicates.add(cb.lessThanOrEqualTo(root.get("startDate"), toDate));
+                predicates.add(cb.lessThanOrEqualTo(root.get(Event_.startDate), toDate));
             }
 
             return cb.and(predicates.toArray(new Predicate[0]));

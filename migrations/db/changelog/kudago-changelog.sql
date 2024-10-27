@@ -4,7 +4,7 @@
 CREATE SCHEMA IF NOT EXISTS kudago;
 
 --changeset ghostofendless:2
-CREATE SEQUENCE IF NOT EXISTS kudago.id_table_seq START WITH 1 INCREMENT BY 50;
+CREATE SEQUENCE IF NOT EXISTS kudago.id_table_seq START WITH 1 INCREMENT BY 50 CACHE 50 NO CYCLE;
 
 --changeset ghostofendless:3
 CREATE TABLE kudago.t_locations
