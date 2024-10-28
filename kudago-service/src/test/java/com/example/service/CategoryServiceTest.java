@@ -5,7 +5,7 @@ import com.example.controller.payload.CategoryPayload;
 import com.example.entity.Category;
 import com.example.exception.entity.CategoryNotFoundException;
 import com.example.repository.CategoryRepository;
-import com.example.service.history.CategoryHistoryCaretaker;
+import com.example.service.observer.category.CategoryPublisher;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Tag;
@@ -29,7 +29,7 @@ public class CategoryServiceTest {
 
     @SuppressWarnings("unused")
     @Mock
-    CategoryHistoryCaretaker historyCaretaker;
+    CategoryPublisher categoryPublisher;
 
     @Mock
     CategoryRepository repository;
@@ -105,11 +105,13 @@ public class CategoryServiceTest {
                 .name(category.getName())
                 .build();
         doReturn(category).when(repository).save(payloadCategory);
+        doReturn(false).when(repository).existsBySlug(payloadCategory.getSlug());
 
         var savedCategory = service.createCategory(payloadCategory.getSlug(), payloadCategory.getName());
 
         assertThat(savedCategory).isEqualTo(category);
         verify(repository).save(payloadCategory);
+        verify(repository).existsBySlug(payloadCategory.getSlug());
         verifyNoMoreInteractions(repository);
     }
 
@@ -128,6 +130,7 @@ public class CategoryServiceTest {
                     .id(category.getId())
                     .build();
             doReturn(Optional.of(category)).when(repository).findById(changedCategory.getId());
+            doReturn(false).when(repository).existsBySlug(changedCategory.getSlug());
             doReturn(changedCategory).when(repository).save(changedCategory);
 
             var updatedCategory = service.updateCategory(category.getId(),
@@ -135,6 +138,7 @@ public class CategoryServiceTest {
 
             assertThat(changedCategory).isEqualTo(updatedCategory);
             verify(repository).save(changedCategory);
+            verify(repository).existsBySlug(changedCategory.getSlug());
             verifyNoMoreInteractions(repository);
         }
 

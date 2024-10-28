@@ -2,11 +2,11 @@ package com.example.service;
 
 import com.example.client.KudaGoApiClient;
 import com.example.entity.Category;
-import com.example.entity.history.CategoryMemento;
 import com.example.entity.CrudAction;
+import com.example.exception.entity.CategoryExistsException;
 import com.example.exception.entity.CategoryNotFoundException;
 import com.example.repository.CategoryRepository;
-import com.example.service.history.CategoryHistoryCaretaker;
+import com.example.service.observer.category.CategoryPublisher;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -18,7 +18,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class CategoryService {
 
-    private final CategoryHistoryCaretaker historyCaretaker;
+    private final CategoryPublisher categoryPublisher;
     private final CategoryRepository categoryRepository;
     private final KudaGoApiClient kudaGoApiClient;
 
@@ -27,12 +27,12 @@ public class CategoryService {
         kudaGoApiClient.fetchCategories()
                 .forEach(payload -> {
                     if (!categoryRepository.existsBySlug(payload.slug())) {
-                        var category = categoryRepository.save(
+                        var savedCategory = categoryRepository.save(
                                 Category.builder()
                                         .slug(payload.slug())
                                         .name(payload.name())
                                         .build());
-                        historyCaretaker.saveSnapshot(CategoryMemento.createSnapshot(category, CrudAction.CREATE));
+                        categoryPublisher.notifyObservers(savedCategory, CrudAction.CREATE);
                     }
                 });
         log.info("Categories added!");
@@ -48,24 +48,32 @@ public class CategoryService {
     }
 
     public Category createCategory(String slug, String name) {
-        var category = categoryRepository.save(
+        if (categoryRepository.existsBySlug(slug)) {
+            throw new CategoryExistsException(slug);
+        }
+
+        var savedCategory = categoryRepository.save(
                 Category.builder()
                         .slug(slug)
                         .name(name)
                         .build());
-        historyCaretaker.saveSnapshot(CategoryMemento.createSnapshot(category, CrudAction.CREATE));
+        categoryPublisher.notifyObservers(savedCategory, CrudAction.CREATE);
 
-        return category;
+        return savedCategory;
     }
 
     public Category updateCategory(Long id, String slug, String name) {
-        var category = getCategoryById(id);
+        var oldCategory = getCategoryById(id);
 
-        category.setName(name);
-        category.setSlug(slug);
+        if (categoryRepository.existsBySlug(slug)) {
+            throw new CategoryExistsException(slug);
+        }
 
-        var updatedCategory =  categoryRepository.save(category);
-        historyCaretaker.saveSnapshot(CategoryMemento.createSnapshot(category, CrudAction.UPDATE));
+        oldCategory.setName(name);
+        oldCategory.setSlug(slug);
+
+        var updatedCategory =  categoryRepository.save(oldCategory);
+        categoryPublisher.notifyObservers(updatedCategory, CrudAction.UPDATE);
 
         return updatedCategory;
     }
@@ -73,6 +81,6 @@ public class CategoryService {
     public void deleteCategory(Long id) {
         var category = getCategoryById(id);
         categoryRepository.deleteById(id);
-        historyCaretaker.saveSnapshot(CategoryMemento.createSnapshot(category, CrudAction.DELETE));
+        categoryPublisher.notifyObservers(category, CrudAction.DELETE);
     }
 }

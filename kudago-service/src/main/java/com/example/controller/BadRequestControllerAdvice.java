@@ -6,6 +6,7 @@ import com.example.exception.InvalidCurrencyException;
 import com.example.exception.ServiceUnavailableException;
 import com.example.exception.entity.EntityNotFoundException;
 import com.example.exception.entity.RelatedEntityNotFoundException;
+import com.example.exception.entity.SlugAlreadyExistsException;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
 import lombok.RequiredArgsConstructor;
@@ -120,6 +121,15 @@ public class BadRequestControllerAdvice {
                         .forStatusAndDetail(HttpStatus.BAD_REQUEST,
                                 messageSource.getMessage(exception.getMessage(), new Object[0],
                                         exception.getMessage(), locale)));
+    }
+
+    @ExceptionHandler(SlugAlreadyExistsException.class)
+    public ResponseEntity<ProblemDetail> handleSlugAlreadyExistsException(SlugAlreadyExistsException exception,
+                                                                          Locale locale) {
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT,
+                        messageSource.getMessage(exception.getMessage(), new Object[]{exception.getSlug()},
+                                exception.getMessage(), locale)));
     }
 
     @ExceptionHandler(EntityNotFoundException.class)
