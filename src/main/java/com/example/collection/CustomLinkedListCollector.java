@@ -23,7 +23,7 @@ public class CustomLinkedListCollector<E> implements Collector<E, CustomLinkedLi
     @Override
     public BinaryOperator<CustomLinkedList<E>> combiner() {
         return (list1, list2) -> {
-            list2.forEach(list1::add);
+            list2.iterator().forEachRemaining(list1::add);
             return list1;
         };
     }
