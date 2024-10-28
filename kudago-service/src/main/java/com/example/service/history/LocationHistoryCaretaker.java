@@ -1,4 +1,4 @@
-package com.example.service;
+package com.example.service.history;
 
 import com.example.entity.history.LocationHistory;
 import com.example.entity.history.LocationMemento;

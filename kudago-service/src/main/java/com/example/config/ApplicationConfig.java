@@ -28,7 +28,7 @@ public class ApplicationConfig {
         return WebClient.create(uri);
     }
 
-    @Bean
+    @Bean(name = "dataLoaderThreadPool")
     public ExecutorService dataLoaderThreadPool(@Value("${data-loading.threads}") int numOfThreads) {
         var namedThreadFactory = new ThreadFactoryBuilder()
                 .setNameFormat("data-loader-%d").build();
@@ -49,7 +49,7 @@ public class ApplicationConfig {
         executor.setCorePoolSize(3);
         executor.setMaxPoolSize(3);
         executor.setQueueCapacity(100);
-        executor.setThreadNamePrefix("AsynchThread-");
+        executor.setThreadNamePrefix("AsyncThread-");
         executor.initialize();
 
         return executor;
@@ -58,5 +58,10 @@ public class ApplicationConfig {
     @Bean
     public Duration dataInitSchedule(@Value("${data-loading.interval}") long durationSeconds) {
         return Duration.ofSeconds(durationSeconds);
+    }
+
+    @Bean
+    public Duration dataInitTimeout(@Value("${data-loading.timeout:60}") long timeoutSeconds) {
+        return Duration.ofSeconds(timeoutSeconds);
     }
 }

@@ -4,7 +4,7 @@ import com.example.aspect.LogExecutionTime;
 import com.example.controller.payload.CategoryPayload;
 import com.example.entity.Category;
 import com.example.entity.history.CategoryMemento;
-import com.example.service.CategoryHistoryCaretaker;
+import com.example.service.history.CategoryHistoryCaretaker;
 import com.example.service.CategoryService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

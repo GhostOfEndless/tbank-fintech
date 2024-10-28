@@ -7,6 +7,7 @@ import com.example.entity.Location;
 import com.example.entity.history.LocationMemento;
 import com.example.exception.entity.LocationNotFoundException;
 import com.example.repository.LocationRepository;
+import com.example.service.history.LocationHistoryCaretaker;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

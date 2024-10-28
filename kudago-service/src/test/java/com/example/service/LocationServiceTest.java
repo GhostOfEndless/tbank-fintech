@@ -6,6 +6,7 @@ import com.example.controller.payload.LocationPayload;
 import com.example.entity.Location;
 import com.example.exception.entity.LocationNotFoundException;
 import com.example.repository.LocationRepository;
+import com.example.service.history.LocationHistoryCaretaker;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Tag;

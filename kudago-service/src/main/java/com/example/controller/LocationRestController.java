@@ -4,7 +4,7 @@ import com.example.aspect.LogExecutionTime;
 import com.example.controller.dto.LocationDTO;
 import com.example.controller.payload.LocationPayload;
 import com.example.entity.history.LocationMemento;
-import com.example.service.LocationHistoryCaretaker;
+import com.example.service.history.LocationHistoryCaretaker;
 import com.example.service.LocationService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

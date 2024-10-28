@@ -6,6 +6,7 @@ import com.example.entity.history.CategoryMemento;
 import com.example.entity.CrudAction;
 import com.example.exception.entity.CategoryNotFoundException;
 import com.example.repository.CategoryRepository;
+import com.example.service.history.CategoryHistoryCaretaker;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

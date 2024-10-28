@@ -1,6 +1,9 @@
-package com.example.service;
+package com.example.bootstrap;
 
 import com.example.aspect.LogExecutionTime;
+import com.example.bootstrap.command.impl.CategoryInitializationCommand;
+import com.example.bootstrap.command.impl.LocationInitializationCommand;
+import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -10,7 +13,6 @@ import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
 import java.time.Duration;
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -21,47 +23,33 @@ import java.util.concurrent.TimeUnit;
 @RequiredArgsConstructor
 public class DataLoader {
 
-    private final CategoryService categoryService;
-    private final LocationService locationService;
-    private final EventService eventService;
+    private final DataInitializationInvoker dataInitializationInvoker;
+    private final CategoryInitializationCommand categoryCommand;
+    private final LocationInitializationCommand locationCommand;
     private final ExecutorService dataLoaderThreadPool;
     private final ScheduledExecutorService scheduledDataInitPool;
     private final Duration dataInitSchedule;
+
+    @PostConstruct
+    public void setup() {
+        dataInitializationInvoker.addCommand(categoryCommand);
+        dataInitializationInvoker.addCommand(locationCommand);
+    }
 
     @EventListener(ContextRefreshedEvent.class)
     @LogExecutionTime
     public void onApplicationEvent() {
         log.debug("Submit scheduled task for data loading");
-        scheduledDataInitPool.scheduleAtFixedRate(this::loadData,
-                0, dataInitSchedule.toSeconds(), TimeUnit.SECONDS);
+        scheduledDataInitPool.scheduleAtFixedRate(
+                this::loadData,
+                0,
+                dataInitSchedule.toSeconds(),
+                TimeUnit.SECONDS
+        );
     }
 
     public void loadData() {
-        var latch = new CountDownLatch(2);
-
-        log.debug("Starting tasks for data loading");
-        var startTime = System.currentTimeMillis();
-
-        dataLoaderThreadPool.submit(() -> {
-            categoryService.init();
-            latch.countDown();
-        });
-
-        dataLoaderThreadPool.submit(() -> {
-            locationService.init();
-            eventService.init();
-            latch.countDown();
-        });
-
-        try {
-            latch.await();
-            var finishTime = System.currentTimeMillis();
-            var workingTime = finishTime - startTime;
-            log.debug("Loading finished in {} ms", workingTime);
-        } catch (InterruptedException e) {
-            log.error("Error occurred while loading data!");
-            Thread.currentThread().interrupt();
-        }
+        dataInitializationInvoker.executeCommands();
     }
 
     @PreDestroy

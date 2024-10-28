@@ -5,6 +5,7 @@ import com.example.controller.payload.CategoryPayload;
 import com.example.entity.Category;
 import com.example.exception.entity.CategoryNotFoundException;
 import com.example.repository.CategoryRepository;
+import com.example.service.history.CategoryHistoryCaretaker;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Tag;
