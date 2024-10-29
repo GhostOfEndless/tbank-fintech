@@ -31,4 +31,4 @@ spring:
 data-loading:
   threads: 2
   interval: 3600 # in seconds
-
+  timeout: 120 # in seconds

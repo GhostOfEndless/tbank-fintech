@@ -3,7 +3,9 @@ package com.example.service;
 import com.example.client.KudaGoApiClient;
 import com.example.controller.payload.CategoryPayload;
 import com.example.entity.Category;
-import com.example.repository.inmemory.CategoryInMemoryRepository;
+import com.example.exception.entity.CategoryNotFoundException;
+import com.example.repository.CategoryRepository;
+import com.example.service.observer.category.CategoryPublisher;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Tag;
@@ -14,18 +16,23 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 @ExtendWith(MockitoExtension.class)
 public class CategoryServiceTest {
 
+    @SuppressWarnings("unused")
     @Mock
-    CategoryInMemoryRepository repository;
+    CategoryPublisher categoryPublisher;
+
+    @Mock
+    CategoryRepository repository;
 
     @Mock
     KudaGoApiClient kudaGoApiClient;
@@ -83,7 +90,7 @@ public class CategoryServiceTest {
         @Test
         @DisplayName("Should throw exception when category not found by ID")
         public void getById_notFound() {
-            assertThatExceptionOfType(NoSuchElementException.class)
+            assertThatExceptionOfType(CategoryNotFoundException.class)
                     .isThrownBy(() -> service.getCategoryById(category.getId()))
                     .withMessage("category.not_found");
         }
@@ -98,11 +105,13 @@ public class CategoryServiceTest {
                 .name(category.getName())
                 .build();
         doReturn(category).when(repository).save(payloadCategory);
+        doReturn(false).when(repository).existsBySlug(payloadCategory.getSlug());
 
         var savedCategory = service.createCategory(payloadCategory.getSlug(), payloadCategory.getName());
 
         assertThat(savedCategory).isEqualTo(category);
         verify(repository).save(payloadCategory);
+        verify(repository).existsBySlug(payloadCategory.getSlug());
         verifyNoMoreInteractions(repository);
     }
 
@@ -120,7 +129,8 @@ public class CategoryServiceTest {
                     .slug(category.getSlug())
                     .id(category.getId())
                     .build();
-            doReturn(true).when(repository).existsById(changedCategory.getId());
+            doReturn(Optional.of(category)).when(repository).findById(changedCategory.getId());
+            doReturn(false).when(repository).existsBySlug(changedCategory.getSlug());
             doReturn(changedCategory).when(repository).save(changedCategory);
 
             var updatedCategory = service.updateCategory(category.getId(),
@@ -128,6 +138,7 @@ public class CategoryServiceTest {
 
             assertThat(changedCategory).isEqualTo(updatedCategory);
             verify(repository).save(changedCategory);
+            verify(repository).existsBySlug(changedCategory.getSlug());
             verifyNoMoreInteractions(repository);
         }
 
@@ -139,9 +150,9 @@ public class CategoryServiceTest {
                     .slug(category.getSlug())
                     .id(category.getId())
                     .build();
-            doReturn(false).when(repository).existsById(changedCategory.getId());
+            doReturn(Optional.empty()).when(repository).findById(changedCategory.getId());
 
-            assertThatExceptionOfType(NoSuchElementException.class)
+            assertThatExceptionOfType(CategoryNotFoundException.class)
                     .isThrownBy(() -> service.updateCategory(
                             category.getId(),
                             changedCategory.getSlug(),
@@ -158,20 +169,20 @@ public class CategoryServiceTest {
         @Test
         @DisplayName("Should successfully delete an existing category")
         public void deleteCategory_success() {
-            doReturn(true).when(repository).existsById(category.getId());
+            doReturn(Optional.of(category)).when(repository).findById(category.getId());
 
             service.deleteCategory(category.getId());
 
-            verify(repository).delete(category.getId());
+            verify(repository).deleteById(category.getId());
             verifyNoMoreInteractions(repository);
         }
 
         @Test
         @DisplayName("Should throw exception when deleting non-existent category")
         public void deleteCategory_notFound() {
-            doReturn(false).when(repository).existsById(category.getId());
+            doReturn(Optional.empty()).when(repository).findById(category.getId());
 
-            assertThatExceptionOfType(NoSuchElementException.class)
+            assertThatExceptionOfType(CategoryNotFoundException.class)
                     .isThrownBy(() -> service.deleteCategory(category.getId()))
                     .withMessage("category.not_found");
         }
@@ -185,7 +196,20 @@ public class CategoryServiceTest {
                 .name("test")
                 .slug("test")
                 .build();
+
+        var categoryForSave = Category.builder()
+                .slug(payload.slug())
+                .name(payload.name())
+                .build();
+
+        var savedCategory = Category.builder()
+                .id(1L)
+                .slug(payload.slug())
+                .name(payload.name())
+                .build();
+
         doReturn(List.of(payload)).when(kudaGoApiClient).fetchCategories();
+        doReturn(savedCategory).when(repository).save(categoryForSave);
 
         service.init();
 

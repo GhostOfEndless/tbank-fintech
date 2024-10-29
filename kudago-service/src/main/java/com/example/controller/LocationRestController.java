@@ -3,6 +3,8 @@ package com.example.controller;
 import com.example.aspect.LogExecutionTime;
 import com.example.controller.dto.LocationDTO;
 import com.example.controller.payload.LocationPayload;
+import com.example.entity.history.LocationMemento;
+import com.example.service.history.LocationHistoryCaretaker;
 import com.example.service.LocationService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -25,6 +27,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class LocationRestController {
 
+    private final LocationHistoryCaretaker historyCaretaker;
     private final LocationService locationService;
 
     @GetMapping
@@ -35,6 +38,11 @@ public class LocationRestController {
     @GetMapping("/{id}")
     public LocationDTO getLocationById(@PathVariable Long id) {
         return locationService.getLocationById(id);
+    }
+
+    @GetMapping("/{id}/history")
+    public List<LocationMemento> getHistory(@PathVariable Long id) {
+        return historyCaretaker.getHistory(id);
     }
 
     @PostMapping

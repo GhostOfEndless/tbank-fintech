@@ -6,6 +6,7 @@ import com.example.exception.InvalidCurrencyException;
 import com.example.exception.ServiceUnavailableException;
 import com.example.exception.entity.EntityNotFoundException;
 import com.example.exception.entity.RelatedEntityNotFoundException;
+import com.example.exception.entity.SlugAlreadyExistsException;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
 import lombok.RequiredArgsConstructor;
@@ -22,7 +23,6 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import java.util.Locale;
-import java.util.NoSuchElementException;
 import java.util.Objects;
 
 @Slf4j
@@ -123,12 +123,12 @@ public class BadRequestControllerAdvice {
                                         exception.getMessage(), locale)));
     }
 
-    @ExceptionHandler(NoSuchElementException.class)
-    public ResponseEntity<ProblemDetail> handleNoSuchElementException(NoSuchElementException exception,
-                                                                      Locale locale) {
-        return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                .body(ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND,
-                        messageSource.getMessage(exception.getMessage(), new Object[0],
+    @ExceptionHandler(SlugAlreadyExistsException.class)
+    public ResponseEntity<ProblemDetail> handleSlugAlreadyExistsException(SlugAlreadyExistsException exception,
+                                                                          Locale locale) {
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT,
+                        messageSource.getMessage(exception.getMessage(), new Object[]{exception.getSlug()},
                                 exception.getMessage(), locale)));
     }
 

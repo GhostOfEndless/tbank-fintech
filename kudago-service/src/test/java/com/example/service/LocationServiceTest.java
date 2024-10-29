@@ -5,7 +5,8 @@ import com.example.controller.dto.LocationDTO;
 import com.example.controller.payload.LocationPayload;
 import com.example.entity.Location;
 import com.example.exception.entity.LocationNotFoundException;
-import com.example.repository.jpa.LocationRepository;
+import com.example.repository.LocationRepository;
+import com.example.service.observer.location.LocationPublisher;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Tag;
@@ -42,8 +43,14 @@ public class LocationServiceTest {
 
     @Mock
     LocationRepository repository;
+
+    @SuppressWarnings("unused")
+    @Mock
+    LocationPublisher locationPublisher;
+
     @Mock
     KudaGoApiClient kudaGoApiClient;
+
     @InjectMocks
     LocationService service;
 
@@ -63,6 +70,7 @@ public class LocationServiceTest {
                 .build();
 
         doReturn(savedLocation).when(repository).save(payloadLocation);
+        doReturn(false).when(repository).existsBySlug(payloadLocation.getSlug());
 
         var newLocation = service.createLocation(payloadLocation.getSlug(), payloadLocation.getName());
 
@@ -71,6 +79,7 @@ public class LocationServiceTest {
                 () -> assertThat(newLocation.slug()).isEqualTo(payloadLocation.getSlug())
         );
         verify(repository).save(payloadLocation);
+        verify(repository).existsBySlug(payloadLocation.getSlug());
         verifyNoMoreInteractions(repository);
     }
 
@@ -82,7 +91,20 @@ public class LocationServiceTest {
                 .name("test")
                 .slug("test")
                 .build();
+
+        var locationForSave = Location.builder()
+                .slug(payload.slug())
+                .name(payload.name())
+                .build();
+
+        var savedLocation = Location.builder()
+                .id(1L)
+                .slug(payload.slug())
+                .name(payload.name())
+                .build();
+
         doReturn(List.of(payload)).when(kudaGoApiClient).fetchLocations();
+        doReturn(savedLocation).when(repository).save(locationForSave);
 
         service.init();
 
@@ -161,6 +183,7 @@ public class LocationServiceTest {
                     .build();
 
             doReturn(Optional.of(changedLocation)).when(repository).findById(changedLocation.getId());
+            doReturn(false).when(repository).existsBySlug(changedLocation.getSlug());
             doReturn(changedLocation).when(repository).save(changedLocation);
 
             var updatedLocation = service.updateLocation(location.getId(),
@@ -168,6 +191,7 @@ public class LocationServiceTest {
 
             assertThat(changedLocationDTO).isEqualTo(updatedLocation);
             verify(repository).save(changedLocation);
+            verify(repository).existsBySlug(changedLocation.getSlug());
             verifyNoMoreInteractions(repository);
         }
 
@@ -198,7 +222,7 @@ public class LocationServiceTest {
         @Test
         @DisplayName("Should successfully delete an existing location")
         public void deleteLocation_success() {
-            doReturn(true).when(repository).existsById(location.getId());
+            doReturn(Optional.of(location)).when(repository).findById(location.getId());
 
             service.deleteLocation(location.getId());
 
@@ -209,7 +233,7 @@ public class LocationServiceTest {
         @Test
         @DisplayName("Should throw exception when deleting non-existent location")
         public void deleteLocation_notFound() {
-            doReturn(false).when(repository).existsById(location.getId());
+            doReturn(Optional.empty()).when(repository).findById(location.getId());
 
             assertThatExceptionOfType(LocationNotFoundException.class)
                     .isThrownBy(() -> service.deleteLocation(location.getId()))

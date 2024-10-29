@@ -3,6 +3,8 @@ package com.example.controller;
 import com.example.aspect.LogExecutionTime;
 import com.example.controller.payload.CategoryPayload;
 import com.example.entity.Category;
+import com.example.entity.history.CategoryMemento;
+import com.example.service.history.CategoryHistoryCaretaker;
 import com.example.service.CategoryService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -26,6 +28,7 @@ import java.util.List;
 public class CategoryRestController {
 
     private final CategoryService categoryService;
+    private final CategoryHistoryCaretaker historyCaretaker;
 
     @GetMapping
     public List<Category> getAllCategories() {
@@ -35,6 +38,11 @@ public class CategoryRestController {
     @GetMapping("/{id}")
     public Category getCategoryById(@PathVariable Long id) {
         return categoryService.getCategoryById(id);
+    }
+
+    @GetMapping("/{id}/history")
+    public List<CategoryMemento> getHistory(@PathVariable Long id) {
+        return historyCaretaker.getHistory(id);
     }
 
     @PostMapping

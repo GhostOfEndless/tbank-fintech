@@ -1,9 +1,46 @@
 package com.example.collection;
 
-import java.util.Iterator;
+import java.util.NoSuchElementException;
 import java.util.Objects;
+import java.util.function.Consumer;
 
-public class CustomLinkedList<E> implements Iterable<E> {
+public class CustomLinkedList<E> {
+
+    /**
+     * Returns an iterator over the elements in this list.
+     *
+     * @return an iterator over the elements in this list
+     */
+    public CustomIterator<E> iterator() {
+        return new LinkedListIterator();
+    }
+
+    private class LinkedListIterator implements CustomIterator<E> {
+        private Node current = head;
+
+        @Override
+        public boolean hasNext() {
+            return current != null;
+        }
+
+        @Override
+        public E next() {
+            if (!hasNext()) {
+                throw new NoSuchElementException("No more elements in the list");
+            }
+            E data = current.data;
+            current = current.next;
+            return data;
+        }
+
+        @Override
+        public void forEachRemaining(Consumer<? super E> action) {
+            Objects.requireNonNull(action);
+            while (hasNext()) {
+                action.accept(next());
+            }
+        }
+    }
 
     private class Node {
         public E data;
@@ -85,12 +122,9 @@ public class CustomLinkedList<E> implements Iterable<E> {
      * @return {@code true} if all elements were successfully added to the list, {@code false} otherwise
      * @throws NullPointerException if the specified collection is {@code null}
      */
-    public boolean addAll(Iterable<? extends E> collection) {
-        boolean flag = true;
-        for (E element : collection) {
-            flag &= add(element);
-        }
-        return flag;
+    public boolean addAll(CustomLinkedList<? extends E> collection) {
+        collection.iterator().forEachRemaining(this::add);
+        return true;
     }
 
     /**
@@ -151,32 +185,6 @@ public class CustomLinkedList<E> implements Iterable<E> {
             node = node.next;
         }
         return node;
-    }
-
-    /**
-     * Returns an iterator over the elements in this linked list.
-     * It provides methods to check if more elements are available ({@code hasNext()})
-     * and to retrieve the next element ({@code next()}).
-     *
-     * @return an {@code Iterator<E>} over the elements in this list
-     */
-    @Override
-    public Iterator<E> iterator() {
-        return new Iterator<>() {
-            private Node current = head;
-
-            @Override
-            public boolean hasNext() {
-                return current != null;
-            }
-
-            @Override
-            public E next() {
-                E data = current.data;
-                current = current.next;
-                return data;
-            }
-        };
     }
 
     /**

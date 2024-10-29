@@ -6,7 +6,6 @@ import com.example.util.JsonFileUtil;
 import com.example.util.impl.JsonFileUtilImpl;
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.List;
 import java.util.stream.Stream;
 
 import static com.example.collection.CustomLinkedListCollector.toCustomLinkedList;
@@ -39,7 +38,7 @@ public class Main {
         log.info("Is list contains '1'? - {}",
                 list.contains(1));
         log.info("Adding to list numbers '1, 2, 3'. Result is {}",
-                list.addAll(List.of(1, 2, 3)));
+                list.addAll(CustomLinkedList.of(1, 2, 3)));
         log.info("Now list contains: {}", list);
 
         log.info("Changing list with Stream reduce...");
