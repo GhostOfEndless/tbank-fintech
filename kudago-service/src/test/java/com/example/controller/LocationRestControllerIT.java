@@ -55,7 +55,7 @@ public class LocationRestControllerIT extends BaseIT {
             var createdLocation = createLocation("test", "Test Location");
 
             var mvcResponse = mockMvc.perform(get(uri)
-                            .header("Authorization", bearerToken))
+                            .header("Authorization", userBearerToken))
                     .andExpectAll(
                             status().isOk(),
                             content().contentType(MediaType.APPLICATION_JSON))
@@ -86,7 +86,7 @@ public class LocationRestControllerIT extends BaseIT {
             var createdLocation = createLocation("test", "Test Location");
 
             var mvcResponse = mockMvc.perform(get(uri + "/" + createdLocation.id())
-                            .header("Authorization", bearerToken))
+                            .header("Authorization", userBearerToken))
                     .andExpectAll(
                             status().isOk(),
                             content().contentType(MediaType.APPLICATION_JSON))
@@ -105,7 +105,7 @@ public class LocationRestControllerIT extends BaseIT {
         @DisplayName("Should return 404 when location doesn't exist")
         public void getLocationById_notFound() {
             mockMvc.perform(get(uri + "/999")
-                            .header("Authorization", bearerToken))
+                            .header("Authorization", userBearerToken))
                     .andExpectAll(
                             status().isNotFound(),
                             content().contentType(MediaType.APPLICATION_PROBLEM_JSON));
@@ -127,7 +127,7 @@ public class LocationRestControllerIT extends BaseIT {
                     .build();
 
             var mvcResponse = mockMvc.perform(post(uri)
-                            .header("Authorization", bearerToken)
+                            .header("Authorization", userBearerToken)
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(payload)))
                     .andExpectAll(
@@ -151,7 +151,7 @@ public class LocationRestControllerIT extends BaseIT {
         @DisplayName("Should return 400 when payload is invalid")
         public void createLocation_badRequest(LocationPayload payload) {
             mockMvc.perform(post(uri)
-                            .header("Authorization", bearerToken)
+                            .header("Authorization", userBearerToken)
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(payload)))
                     .andExpectAll(
@@ -181,7 +181,7 @@ public class LocationRestControllerIT extends BaseIT {
                     .build();
 
             var mvcResponse = mockMvc.perform(put(uri + "/{id}", createdLocation.id())
-                            .header("Authorization", bearerToken)
+                            .header("Authorization", userBearerToken)
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(payload)))
                     .andExpectAll(
@@ -209,7 +209,7 @@ public class LocationRestControllerIT extends BaseIT {
             var createdLocation = createLocation("old", "Old Name");
 
             mockMvc.perform(put(uri + "/{id}", createdLocation.id())
-                            .header("Authorization", bearerToken)
+                            .header("Authorization", userBearerToken)
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(updatePayload)))
                     .andExpectAll(
@@ -229,7 +229,7 @@ public class LocationRestControllerIT extends BaseIT {
                     .build();
 
             mockMvc.perform(put(uri + "/999")
-                            .header("Authorization", bearerToken)
+                            .header("Authorization", userBearerToken)
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(payload)))
                     .andExpectAll(
@@ -256,7 +256,7 @@ public class LocationRestControllerIT extends BaseIT {
             deleteLocation(createdLocation.id());
 
             mockMvc.perform(get(uri + "/{id}", createdLocation.id())
-                            .header("Authorization", bearerToken))
+                            .header("Authorization", userBearerToken))
                     .andExpect(status().isNotFound());
         }
 
@@ -265,7 +265,7 @@ public class LocationRestControllerIT extends BaseIT {
         @DisplayName("Should return 404 when deleting non-existent location")
         public void deleteLocation_notFound() {
             mockMvc.perform(delete(uri + "/999")
-                            .header("Authorization", bearerToken))
+                            .header("Authorization", userBearerToken))
                     .andExpectAll(
                             status().isNotFound(),
                             content().contentType(MediaType.APPLICATION_PROBLEM_JSON));
@@ -280,7 +280,7 @@ public class LocationRestControllerIT extends BaseIT {
                 .build();
 
         var mvcResponse = mockMvc.perform(post(uri)
-                        .header("Authorization", bearerToken)
+                        .header("Authorization", userBearerToken)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(payload)))
                 .andExpectAll(
@@ -295,7 +295,7 @@ public class LocationRestControllerIT extends BaseIT {
     @SneakyThrows
     private void deleteLocation(Long id) {
         mockMvc.perform(delete(uri + "/" + id)
-                        .header("Authorization", bearerToken))
+                        .header("Authorization", userBearerToken))
                 .andExpect(status().isNoContent());
     }
 }

@@ -66,7 +66,7 @@ public class LocationEventsRestControllerIT extends BaseIT {
                 eventPayload.startDate(), createdLocation.id());
 
         var mvcResponse = mockMvc.perform(get(events_url + "/{id}", createdEvent.getId())
-                        .header("Authorization", bearerToken))
+                        .header("Authorization", userBearerToken))
                 .andExpectAll(
                         status().isOk(),
                         content().contentType(MediaType.APPLICATION_JSON))
@@ -94,7 +94,7 @@ public class LocationEventsRestControllerIT extends BaseIT {
                 eventPayload.startDate().plus(Duration.ofDays(5)), createdLocation.id());
 
         var mvcResponse = mockMvc.perform(get(events_url + "/search")
-                        .header("Authorization", bearerToken)
+                        .header("Authorization", userBearerToken)
                         .param("locationId", String.valueOf(createdLocation.id()))
                         .param("name", eventPayload.name().substring(eventPayload.name().length() / 2))
                         .param("dateFrom", createdEvent.getStartDate().minus(Duration.ofDays(1)).toString())
@@ -129,7 +129,7 @@ public class LocationEventsRestControllerIT extends BaseIT {
                 eventPayload.startDate(), createdLocation.id());
 
         var mvcResponse = mockMvc.perform(get(events_url + "/search")
-                        .header("Authorization", bearerToken)
+                        .header("Authorization", userBearerToken)
                         .param("locationId", String.valueOf(locationId.isEmpty() ?
                                 locationId : createdLocation.id()))
                         .param("name", name)
@@ -164,7 +164,7 @@ public class LocationEventsRestControllerIT extends BaseIT {
                 eventPayload.startDate(), createdLocation.id());
 
         var mvcResponse = mockMvc.perform(get(events_url)
-                        .header("Authorization", bearerToken)
+                        .header("Authorization", userBearerToken)
                         .param("locationId", String.valueOf(createdLocation.id())))
                 .andExpectAll(
                         status().isOk(),
@@ -203,7 +203,7 @@ public class LocationEventsRestControllerIT extends BaseIT {
                 .build();
 
         mockMvc.perform(patch(events_url + "/{id}", createdEvent.getId())
-                        .header("Authorization", bearerToken)
+                        .header("Authorization", userBearerToken)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(updatePayload)))
                 .andExpectAll(
@@ -242,7 +242,7 @@ public class LocationEventsRestControllerIT extends BaseIT {
                 .build();
 
         var mvcResponse = mockMvc.perform(patch(events_url + "/{id}", createdEvent.getId())
-                        .header("Authorization", bearerToken)
+                        .header("Authorization", userBearerToken)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(updatePayload)))
                 .andExpectAll(
@@ -271,7 +271,7 @@ public class LocationEventsRestControllerIT extends BaseIT {
                 .build();
 
         var mvcResponse = mockMvc.perform(post(location_url)
-                        .header("Authorization", bearerToken)
+                        .header("Authorization", userBearerToken)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(payload)))
                 .andExpectAll(
@@ -294,7 +294,7 @@ public class LocationEventsRestControllerIT extends BaseIT {
                 .build();
 
         var mvcResponse = mockMvc.perform(post(events_url)
-                        .header("Authorization", bearerToken)
+                        .header("Authorization", userBearerToken)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(payload)))
                 .andExpectAll(
@@ -309,14 +309,14 @@ public class LocationEventsRestControllerIT extends BaseIT {
     @SneakyThrows
     private void deleteLocation(Long id) {
         mockMvc.perform(delete(location_url + "/{id}", id)
-                        .header("Authorization", bearerToken))
+                        .header("Authorization", userBearerToken))
                 .andExpect(status().isNoContent());
     }
 
     @SneakyThrows
     private void deleteEvent(Long id) {
         mockMvc.perform(delete(events_url + "/{id}", id)
-                        .header("Authorization", bearerToken))
+                        .header("Authorization", userBearerToken))
                 .andExpect(status().isNoContent());
     }
 }

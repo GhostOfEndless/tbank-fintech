@@ -1,9 +1,6 @@
-package com.example;
+package com.example.auth;
 
-import com.example.auth.AuthenticationRequest;
-import com.example.auth.AuthenticationResponse;
-import com.example.auth.ChangePasswordRequest;
-import com.example.auth.RegistrationRequest;
+import com.example.BaseIT;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;

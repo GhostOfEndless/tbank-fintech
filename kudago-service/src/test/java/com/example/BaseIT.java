@@ -40,10 +40,17 @@ public abstract class BaseIT {
     @Autowired
     protected AuthenticationService authenticationService;
 
-    protected static String bearerToken;
+    protected static String userBearerToken;
+    protected static String adminBearerToken;
 
-    protected static final AuthenticationRequest request = new AuthenticationRequest(
+    protected static final AuthenticationRequest userRequest = new AuthenticationRequest(
             "user",
+            "password",
+            false
+    );
+
+    protected static final AuthenticationRequest adminRequest = new AuthenticationRequest(
+            "admin",
             "password",
             false
     );
@@ -81,8 +88,12 @@ public abstract class BaseIT {
 
     @BeforeEach
     public void getToken() {
-        if (bearerToken == null) {
-            bearerToken = "Bearer %s".formatted(authenticationService.authenticate(request).token());
+        if (userBearerToken == null) {
+            userBearerToken = "Bearer %s".formatted(authenticationService.authenticate(userRequest).token());
+        }
+
+        if (adminBearerToken == null) {
+            adminBearerToken = "Bearer %s".formatted(authenticationService.authenticate(adminRequest).token());
         }
     }
 }

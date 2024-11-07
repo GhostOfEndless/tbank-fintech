@@ -148,7 +148,7 @@ public class EventsRestControllerIT extends BaseIT {
         registerStubs();
 
         mockMvc.perform(MockMvcRequestBuilders.get(uri + "/reactive")
-                        .header("Authorization", bearerToken)
+                        .header("Authorization", userBearerToken)
                         .param("currency", currency)
                         .param("budget", budget)
                         .param("dateFrom", dateFrom)
@@ -163,7 +163,7 @@ public class EventsRestControllerIT extends BaseIT {
     @SneakyThrows
     private MockHttpServletResponse getResponse(String url, int status, MediaType mediaType) {
         return mockMvc.perform(MockMvcRequestBuilders.get(uri + url)
-                        .header("Authorization", bearerToken)
+                        .header("Authorization", userBearerToken)
                         .param("currency", "usd")
                         .param("budget", "20.0"))
                 .andExpectAll(
