@@ -7,6 +7,7 @@ import com.example.auth.RegistrationRequest;
 import com.example.entity.security.AppUser;
 import com.example.entity.security.Role;
 import com.example.entity.security.Token;
+import com.example.exception.entity.InvalidTwoFactorCodeException;
 import com.example.exception.entity.UserAlreadyRegisterException;
 import com.example.exception.entity.UserNotFoundException;
 import com.example.repository.security.AppUserRepository;
@@ -88,6 +89,10 @@ public class AuthenticationService {
     }
 
     public void changePassword(@NonNull Authentication authentication, @NonNull ChangePasswordRequest request) {
+        if (!request.twoFactorCode().equals("0000")) {
+            throw new InvalidTwoFactorCodeException();
+        }
+
         var userDetails = (UserDetails) authentication.getPrincipal();
 
         AppUser user = appUserRepository.findByLogin(userDetails.getUsername())

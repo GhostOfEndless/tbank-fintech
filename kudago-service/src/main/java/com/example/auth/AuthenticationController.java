@@ -21,12 +21,12 @@ public class AuthenticationController {
     }
 
     @PostMapping("/api/v1/auth/register")
-    public AuthenticationResponse authenticate(@RequestBody RegistrationRequest request) {
+    public AuthenticationResponse register(@RequestBody RegistrationRequest request) {
         return authenticationService.register(request);
     }
 
     @PostMapping("/api/v1/auth/logout")
-    public ResponseEntity<Void> authenticate(Authentication authentication) {
+    public ResponseEntity<Void> logout(Authentication authentication) {
         authenticationService.logout(authentication);
         return ResponseEntity.ok().build();
     }

@@ -5,6 +5,7 @@ import com.example.exception.DateBoundsException;
 import com.example.exception.InvalidCurrencyException;
 import com.example.exception.ServiceUnavailableException;
 import com.example.exception.entity.EntityNotFoundException;
+import com.example.exception.entity.InvalidTwoFactorCodeException;
 import com.example.exception.entity.RelatedEntityNotFoundException;
 import com.example.exception.entity.SlugAlreadyExistsException;
 import com.example.exception.entity.UserAlreadyRegisterException;
@@ -168,6 +169,17 @@ public class BadRequestControllerAdvice {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST,
                         messageSource.getMessage(exception.getMessage(), new Object[]{exception.getLogin()},
+                                exception.getMessage(), locale)));
+    }
+
+    @ExceptionHandler(InvalidTwoFactorCodeException.class)
+    public ResponseEntity<ProblemDetail> handleInvalidTwoFactorCodeException(
+            @NonNull InvalidTwoFactorCodeException exception,
+            Locale locale
+    ) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .body(ProblemDetail.forStatusAndDetail(HttpStatus.UNAUTHORIZED,
+                        messageSource.getMessage(exception.getMessage(), new Object[]{},
                                 exception.getMessage(), locale)));
     }
 }
