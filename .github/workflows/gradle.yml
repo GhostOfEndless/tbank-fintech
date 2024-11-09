@@ -53,11 +53,6 @@ jobs:
       - name: Generate JaCoCo Report
         run: ./gradlew :kudago-service:jacocoTestReport
 
-      - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v4
-        with:
-          file: kudago-service/build/reports/jacoco/test/jacocoTestReport.xml
-
       - name: Add coverage to PR
         id: jacoco
         uses: madrapps/jacoco-report@v1.7.1
@@ -91,6 +86,9 @@ jobs:
     needs: [build, test, checkstyle]
     runs-on: ubuntu-latest
     name: Package
+    permissions:
+      packages: write
+      pull-requests: write
 
     steps:
       - uses: actions/checkout@v4
