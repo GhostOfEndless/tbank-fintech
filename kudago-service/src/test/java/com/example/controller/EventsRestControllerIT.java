@@ -5,6 +5,9 @@ import com.example.client.dto.EventResponse;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.github.tomakehurst.wiremock.http.Fault;
 import com.github.tomakehurst.wiremock.junit5.WireMockExtension;
+import java.util.List;
+import java.util.function.Supplier;
+import java.util.stream.Stream;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
@@ -21,13 +24,9 @@ import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.testcontainers.junit.jupiter.Testcontainers;
-
-import java.util.List;
-import java.util.function.Supplier;
-import java.util.stream.Stream;
-
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.get;
+import static com.github.tomakehurst.wiremock.client.WireMock.okJson;
 import static com.github.tomakehurst.wiremock.client.WireMock.post;
 import static com.github.tomakehurst.wiremock.client.WireMock.serviceUnavailable;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
@@ -41,161 +40,182 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @Testcontainers
 public class EventsRestControllerIT extends BaseIT {
 
-    private static final String uri = "/api/v1/events";
+  private static final String uri = "/api/v1/events";
 
-    private static final Supplier<Stream<Arguments>> invalidQueryParams = () -> Stream.of(
-            // budget, currency, dateFrom, dateTo
-            Arguments.of("", "", "", ""),
-            Arguments.of("-0.1", "usd", "", ""),
-            Arguments.of("", "usd", "", ""),
-            Arguments.of("0,1", "usd", "", ""),
-            Arguments.of("10.0", "ugf", "", ""),
-            Arguments.of("10.0", "43h", "", ""),
-            Arguments.of("10.0", "", "", ""),
-            Arguments.of("10.0", "usd", "2024-10-10", "2024-09-10"),
-            Arguments.of("10.0", "usd", "fds", "2024-10"),
-            Arguments.of("10.0", "usd", "2024-10-10", ""),
-            Arguments.of("10.0", "usd", "", "2024-09-10")
-    );
+  private static final Supplier<Stream<Arguments>> invalidQueryParams = () -> Stream.of(
+      // budget, currency, dateFrom, dateTo
+      Arguments.of("", "", "", ""),
+      Arguments.of("-0.1", "usd", "", ""),
+      Arguments.of("", "usd", "", ""),
+      Arguments.of("0,1", "usd", "", ""),
+      Arguments.of("10.0", "ugf", "", ""),
+      Arguments.of("10.0", "43h", "", ""),
+      Arguments.of("10.0", "", "", ""),
+      Arguments.of("10.0", "usd", "2024-10-10", "2024-09-10"),
+      Arguments.of("10.0", "usd", "fds", "2024-10"),
+      Arguments.of("10.0", "usd", "2024-10-10", ""),
+      Arguments.of("10.0", "usd", "", "2024-09-10")
+  );
 
-    @RegisterExtension
-    static WireMockExtension wireMockServer = WireMockExtension.newInstance()
-            .options(wireMockConfig().dynamicPort())
-            .build();
+  @RegisterExtension
+  static WireMockExtension wireMockServer = WireMockExtension.newInstance()
+      .options(wireMockConfig().dynamicPort())
+      .build();
 
-    @DynamicPropertySource
-    static void configureProperties(@NotNull DynamicPropertyRegistry registry) {
-        registry.add("kudago.base-url", wireMockServer::baseUrl);
-        registry.add("currency-service.base-url", wireMockServer::baseUrl);
-    }
+  @DynamicPropertySource
+  static void configureProperties(@NotNull DynamicPropertyRegistry registry) {
+    registry.add("kudago.base-url", wireMockServer::baseUrl);
+    registry.add("currency-service.base-url", wireMockServer::baseUrl);
+  }
 
-    private static Stream<Arguments> getInvalidResponses() {
-        return invalidQueryParams.get();
-    }
+  private static Stream<Arguments> getInvalidResponses() {
+    return invalidQueryParams.get();
+  }
 
-    @AfterEach
-    void destroy() {
-        wireMockServer.resetAll();
-    }
+  @AfterEach
+  void destroy() {
+    wireMockServer.resetAll();
+  }
 
-    @SneakyThrows
-    @Test
-    @DisplayName("Should return non empty result for CompletableFuture realisation")
-    void getEventsFuture() {
-        registerStubs();
+  @SneakyThrows
+  @Test
+  @DisplayName("Should return non empty result for CompletableFuture realisation")
+  void getEventsFuture() {
+    registerStubs();
 
-        var mvcResponse = getResponse("/future", 200, MediaType.APPLICATION_JSON);
+    var mvcResponse = getResponse("/future", 200, MediaType.APPLICATION_JSON);
 
-        var content = objectMapper.readValue(mvcResponse.getContentAsString(),
-                new TypeReference<List<EventResponse>>() {
-                });
+    var content = objectMapper.readValue(mvcResponse.getContentAsString(),
+        new TypeReference<List<EventResponse>>() {
+        });
 
-        assertThat(content).isNotEmpty();
-    }
+    assertThat(content).isNotEmpty();
+  }
 
-    @SneakyThrows
-    @Test
-    @DisplayName("Should return non empty result for Project Reactor realisation")
-    void getEventsReactive() {
-        registerStubs();
+  @SneakyThrows
+  @Test
+  @DisplayName("Should return non empty result for Project Reactor realisation")
+  void getEventsReactive() {
+    registerStubs();
 
-        var mvcResponse = getResponse("/reactive", 200, MediaType.APPLICATION_JSON);
+    var mvcResponse = getResponse("/reactive", 200, MediaType.APPLICATION_JSON);
 
-        var content = objectMapper.readValue(mvcResponse.getContentAsString(),
-                new TypeReference<List<EventResponse>>() {
-                });
+    var content = objectMapper.readValue(mvcResponse.getContentAsString(),
+        new TypeReference<List<EventResponse>>() {
+        });
 
-        assertThat(content).isNotEmpty();
-    }
+    assertThat(content).isNotEmpty();
+  }
 
-    @SneakyThrows
-    @Test
-    @DisplayName("Should return 503 status when KudaGo API is unavailable for Project Reactor realisation")
-    void getEventsReactive_error503() {
-        registerStubs503();
-        getResponse("/reactive", 503, MediaType.APPLICATION_PROBLEM_JSON);
-    }
+  @SneakyThrows
+  @Test
+  @DisplayName("Should return 503 status when KudaGo API is unavailable for Project Reactor realisation")
+  void getEventsReactive_error503() {
+    registerStubs503();
+    getResponse("/reactive", 503, MediaType.APPLICATION_PROBLEM_JSON);
+  }
 
-    @SneakyThrows
-    @Test
-    @DisplayName("Should return 503 status when KudaGo API is unavailable for CompletableFuture realisation")
-    void getEventsFuture_error503() {
-        registerStubs503();
-        getResponse("/future", 503, MediaType.APPLICATION_PROBLEM_JSON);
-    }
+  @SneakyThrows
+  @Test
+  @DisplayName("Should return 503 status when KudaGo API is unavailable for CompletableFuture realisation")
+  void getEventsFuture_error503() {
+    registerStubs503();
+    getResponse("/future", 503, MediaType.APPLICATION_PROBLEM_JSON);
+  }
 
-    @SneakyThrows
-    @Test
-    @DisplayName("Should return 503 status when connection error for Project Reactor realisation")
-    void getEventsReactive_connectionError() {
-        registerStubsConnectionError();
-        getResponse("/reactive", 503, MediaType.APPLICATION_PROBLEM_JSON);
-    }
+  @SneakyThrows
+  @Test
+  @DisplayName("Should return 503 status when connection error for Project Reactor realisation")
+  void getEventsReactive_connectionError() {
+    registerStubsConnectionError();
+    getResponse("/reactive", 503, MediaType.APPLICATION_PROBLEM_JSON);
+  }
 
-    @SneakyThrows
-    @Test
-    @DisplayName("Should return 503 status when connection error for CompletableFuture realisation")
-    void getEventsFuture_connectionError() {
-        registerStubsConnectionError();
-        getResponse("/future", 503, MediaType.APPLICATION_PROBLEM_JSON);
-    }
+  @SneakyThrows
+  @Test
+  @DisplayName("Should return 503 status when connection error for CompletableFuture realisation")
+  void getEventsFuture_connectionError() {
+    registerStubsConnectionError();
+    getResponse("/future", 503, MediaType.APPLICATION_PROBLEM_JSON);
+  }
 
-    @ParameterizedTest
-    @SneakyThrows
-    @MethodSource("getInvalidResponses")
-    @DisplayName("Should return 400 status while request is invalid")
-    void getEventsReactive_badRequest(String budget, String currency, String dateFrom, String dateTo) {
-        registerStubs();
+  @ParameterizedTest
+  @SneakyThrows
+  @MethodSource("getInvalidResponses")
+  @DisplayName("Should return 400 status while request is invalid")
+  void getEventsReactive_badRequest(String budget, String currency, String dateFrom, String dateTo) {
+    wireMockServer.stubFor(get(urlPathEqualTo("/events/"))
+        .willReturn(aResponse().proxiedFrom("https://kudago.com/public-api/v1.4")));
 
-        mockMvc.perform(MockMvcRequestBuilders.get(uri + "/reactive")
-                        .header("Authorization", userBearerToken)
-                        .param("currency", currency)
-                        .param("budget", budget)
-                        .param("dateFrom", dateFrom)
-                        .param("dateTo", dateTo))
-                .andExpectAll(
-                        status().isBadRequest(),
-                        content().contentType(MediaType.APPLICATION_PROBLEM_JSON))
-                .andReturn()
-                .getResponse();
-    }
+    wireMockServer.stubFor(post(urlEqualTo("/convert"))
+        .willReturn(aResponse()
+            .withStatus(400)
+            .withBody("""
+                {
+                    "type":"about:blank",
+                    "title":"Bad Request",
+                    "status":400,
+                    "detail":"Неверный ISO код валюты 'UGF'",
+                    "instance":"/api/v1/currencies/convert"
+                }
+                """)
+            .withHeader("Content-Type", "application/problem+json")));
 
-    @SneakyThrows
-    private MockHttpServletResponse getResponse(String url, int status, MediaType mediaType) {
-        return mockMvc.perform(MockMvcRequestBuilders.get(uri + url)
-                        .header("Authorization", userBearerToken)
-                        .param("currency", "usd")
-                        .param("budget", "20.0"))
-                .andExpectAll(
-                        status().is(status),
-                        content().contentType(mediaType))
-                .andReturn()
-                .getResponse();
-    }
+    mockMvc.perform(MockMvcRequestBuilders.get(uri + "/reactive")
+            .header("Authorization", userBearerToken)
+            .param("currency", currency)
+            .param("budget", budget)
+            .param("dateFrom", dateFrom)
+            .param("dateTo", dateTo))
+        .andExpectAll(
+            status().isBadRequest(),
+            content().contentType(MediaType.APPLICATION_PROBLEM_JSON))
+        .andReturn()
+        .getResponse();
+  }
 
-    private void registerStubs() {
-        wireMockServer.stubFor(post(urlEqualTo("/convert"))
-                .willReturn(aResponse().proxiedFrom("http://localhost:8081/api/v1/currencies")));
+  @SneakyThrows
+  private MockHttpServletResponse getResponse(String url, int status, MediaType mediaType) {
+    return mockMvc.perform(MockMvcRequestBuilders.get(uri + url)
+            .header("Authorization", userBearerToken)
+            .param("currency", "usd")
+            .param("budget", "20.0"))
+        .andExpectAll(
+            status().is(status),
+            content().contentType(mediaType))
+        .andReturn()
+        .getResponse();
+  }
 
-        wireMockServer.stubFor(get(urlPathEqualTo("/events/"))
-                .willReturn(aResponse().proxiedFrom("https://kudago.com/public-api/v1.4")));
-    }
+  private void registerStubs() {
+    wireMockServer.stubFor(post(urlEqualTo("/convert"))
+        .willReturn(okJson("""
+            {
+                "fromCurrency":"RUB",
+                "toCurrency":"RUB",
+                "convertedAmount":1.0
+            }
+            """)));
 
-    private void registerStubs503() {
-        wireMockServer.stubFor(post(urlEqualTo("/convert"))
-                .willReturn(serviceUnavailable()));
+    wireMockServer.stubFor(get(urlPathEqualTo("/events/"))
+        .willReturn(aResponse().proxiedFrom("https://kudago.com/public-api/v1.4")));
+  }
 
-        wireMockServer.stubFor(get(urlPathEqualTo("/events/"))
-                .willReturn(serviceUnavailable()));
-    }
+  private void registerStubs503() {
+    wireMockServer.stubFor(post(urlEqualTo("/convert"))
+        .willReturn(serviceUnavailable()));
 
-    private void registerStubsConnectionError() {
-        wireMockServer.stubFor(post(urlEqualTo("/convert"))
-                .willReturn(aResponse()
-                        .withFault(Fault.CONNECTION_RESET_BY_PEER)));
+    wireMockServer.stubFor(get(urlPathEqualTo("/events/"))
+        .willReturn(serviceUnavailable()));
+  }
 
-        wireMockServer.stubFor(get(urlPathEqualTo("/events/"))
-                .willReturn(aResponse()
-                        .withFault(Fault.CONNECTION_RESET_BY_PEER)));
-    }
+  private void registerStubsConnectionError() {
+    wireMockServer.stubFor(post(urlEqualTo("/convert"))
+        .willReturn(aResponse()
+            .withFault(Fault.CONNECTION_RESET_BY_PEER)));
+
+    wireMockServer.stubFor(get(urlPathEqualTo("/events/"))
+        .willReturn(aResponse()
+            .withFault(Fault.CONNECTION_RESET_BY_PEER)));
+  }
 }

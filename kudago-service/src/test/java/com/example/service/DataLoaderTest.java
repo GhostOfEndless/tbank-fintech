@@ -1,30 +1,29 @@
 package com.example.service;
 
 import com.example.bootstrap.DataLoader;
+import java.time.Duration;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.ScheduledExecutorService;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.time.Duration;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.ScheduledExecutorService;
-
 @ExtendWith(MockitoExtension.class)
 public class DataLoaderTest {
 
-    @Mock
-    private CategoryService categoryService;
+  @Mock
+  private CategoryService categoryService;
 
-    @Mock
-    private EventService eventService;
+  @Mock
+  private EventService eventService;
 
-    @Mock
-    private LocationService locationService;
+  @Mock
+  private LocationService locationService;
 
-    private ExecutorService dataLoaderThreadPool;
-    private ScheduledExecutorService scheduledDataInitPool;
-    private DataLoader dataLoader;
-    private Duration dataInitSchedule;
+  private ExecutorService dataLoaderThreadPool;
+  private ScheduledExecutorService scheduledDataInitPool;
+  private DataLoader dataLoader;
+  private Duration dataInitSchedule;
 
 //    @BeforeEach
 //    void setUp() {

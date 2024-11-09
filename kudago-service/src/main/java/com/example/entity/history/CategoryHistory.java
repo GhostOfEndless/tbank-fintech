@@ -10,14 +10,13 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
+import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
-
-import java.time.LocalDateTime;
 
 @SuperBuilder
 @Getter
@@ -29,25 +28,25 @@ import java.time.LocalDateTime;
 @Table(name = "t_categories_history", schema = "kudago")
 public class CategoryHistory {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "categories_history_seq_generator")
-    @SequenceGenerator(name = "categories_history_seq_generator", sequenceName = "kudago.categories_history_seq")
-    @Column(unique = true, nullable = false)
-    protected Long id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "categories_history_seq_generator")
+  @SequenceGenerator(name = "categories_history_seq_generator", sequenceName = "kudago.categories_history_seq")
+  @Column(unique = true, nullable = false)
+  protected Long id;
 
-    @Column(name = "c_category_id", nullable = false)
-    private Long categoryId;
+  @Column(name = "c_category_id", nullable = false)
+  private Long categoryId;
 
-    @Column(name = "c_slug", nullable = false)
-    private String slug;
+  @Column(name = "c_slug", nullable = false)
+  private String slug;
 
-    @Column(name = "c_name", nullable = false)
-    private String name;
+  @Column(name = "c_name", nullable = false)
+  private String name;
 
-    @Column(name = "c_timestamp", nullable = false)
-    private LocalDateTime timestamp;
+  @Column(name = "c_timestamp", nullable = false)
+  private LocalDateTime timestamp;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "c_action", nullable = false)
-    private CrudAction action;
+  @Enumerated(EnumType.STRING)
+  @Column(name = "c_action", nullable = false)
+  private CrudAction action;
 }

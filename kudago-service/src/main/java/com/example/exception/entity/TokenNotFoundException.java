@@ -4,7 +4,7 @@ import com.example.exception.ApplicationRuntimeException;
 
 public class TokenNotFoundException extends ApplicationRuntimeException {
 
-    public TokenNotFoundException() {
-        super("token.not_found");
-    }
+  public TokenNotFoundException() {
+    super("token.not_found");
+  }
 }

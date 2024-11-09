@@ -11,10 +11,10 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class CategoryObserverImpl implements CategoryObserver {
 
-    private final CategoryHistoryCaretaker historyCaretaker;
+  private final CategoryHistoryCaretaker historyCaretaker;
 
-    @Override
-    public void onLocationChanged(Category category, CrudAction action) {
-        historyCaretaker.saveSnapshot(CategoryMemento.createSnapshot(category, action));
-    }
+  @Override
+  public void onLocationChanged(Category category, CrudAction action) {
+    historyCaretaker.saveSnapshot(CategoryMemento.createSnapshot(category, action));
+  }
 }

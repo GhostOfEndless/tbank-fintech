@@ -7,6 +7,8 @@ import com.example.entity.Location;
 import com.example.exception.entity.LocationNotFoundException;
 import com.example.repository.LocationRepository;
 import com.example.service.observer.location.LocationPublisher;
+import java.util.List;
+import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Tag;
@@ -15,10 +17,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-
-import java.util.List;
-import java.util.Optional;
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.jupiter.api.Assertions.assertAll;
@@ -29,215 +27,215 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 @ExtendWith(MockitoExtension.class)
 public class LocationServiceTest {
 
-    private final LocationDTO locationDTO = LocationDTO.builder()
-            .id(1L)
-            .name("test")
-            .slug("test")
-            .build();
+  private final LocationDTO locationDTO = LocationDTO.builder()
+      .id(1L)
+      .name("test")
+      .slug("test")
+      .build();
 
-    private final Location location = Location.builder()
-            .id(locationDTO.id())
-            .slug(locationDTO.slug())
-            .name(locationDTO.name())
-            .build();
+  private final Location location = Location.builder()
+      .id(locationDTO.id())
+      .slug(locationDTO.slug())
+      .name(locationDTO.name())
+      .build();
 
-    @Mock
-    LocationRepository repository;
+  @Mock
+  LocationRepository repository;
 
-    @SuppressWarnings("unused")
-    @Mock
-    LocationPublisher locationPublisher;
+  @SuppressWarnings("unused")
+  @Mock
+  LocationPublisher locationPublisher;
 
-    @Mock
-    KudaGoApiClient kudaGoApiClient;
+  @Mock
+  KudaGoApiClient kudaGoApiClient;
 
-    @InjectMocks
-    LocationService service;
+  @InjectMocks
+  LocationService service;
+
+  @Test
+  @Tag("Create")
+  @DisplayName("Should successfully create a new location")
+  public void createLocation_success() {
+    var payloadLocation = Location.builder()
+        .name(location.getName())
+        .slug(location.getSlug())
+        .build();
+
+    var savedLocation = Location.builder()
+        .id(location.getId())
+        .name(location.getName())
+        .slug(location.getSlug())
+        .build();
+
+    doReturn(savedLocation).when(repository).save(payloadLocation);
+    doReturn(false).when(repository).existsBySlug(payloadLocation.getSlug());
+
+    var newLocation = service.createLocation(payloadLocation.getSlug(), payloadLocation.getName());
+
+    assertAll(
+        () -> assertThat(newLocation.name()).isEqualTo(payloadLocation.getName()),
+        () -> assertThat(newLocation.slug()).isEqualTo(payloadLocation.getSlug())
+    );
+    verify(repository).save(payloadLocation);
+    verify(repository).existsBySlug(payloadLocation.getSlug());
+    verifyNoMoreInteractions(repository);
+  }
+
+  @Test
+  @Tag("Init")
+  @DisplayName("Should fetch locations from API during initialization")
+  public void init_invokesApi() {
+    var payload = LocationPayload.builder()
+        .name("test")
+        .slug("test")
+        .build();
+
+    var locationForSave = Location.builder()
+        .slug(payload.slug())
+        .name(payload.name())
+        .build();
+
+    var savedLocation = Location.builder()
+        .id(1L)
+        .slug(payload.slug())
+        .name(payload.name())
+        .build();
+
+    doReturn(List.of(payload)).when(kudaGoApiClient).fetchLocations();
+    doReturn(savedLocation).when(repository).save(locationForSave);
+
+    service.init();
+
+    verify(kudaGoApiClient).fetchLocations();
+    verifyNoMoreInteractions(kudaGoApiClient);
+  }
+
+  @Nested
+  @Tag("GetAll")
+  @DisplayName("Get all locations tests")
+  class GetAllLocationsTests {
 
     @Test
-    @Tag("Create")
-    @DisplayName("Should successfully create a new location")
-    public void createLocation_success() {
-        var payloadLocation = Location.builder()
-                .name(location.getName())
-                .slug(location.getSlug())
-                .build();
+    @DisplayName("Should return empty list when no locations exist")
+    public void getAllLocations_empty() {
+      doReturn(List.of()).when(repository).findAll();
 
-        var savedLocation = Location.builder()
-                .id(location.getId())
-                .name(location.getName())
-                .slug(location.getSlug())
-                .build();
+      var locations = service.getAllLocations();
 
-        doReturn(savedLocation).when(repository).save(payloadLocation);
-        doReturn(false).when(repository).existsBySlug(payloadLocation.getSlug());
-
-        var newLocation = service.createLocation(payloadLocation.getSlug(), payloadLocation.getName());
-
-        assertAll(
-                () -> assertThat(newLocation.name()).isEqualTo(payloadLocation.getName()),
-                () -> assertThat(newLocation.slug()).isEqualTo(payloadLocation.getSlug())
-        );
-        verify(repository).save(payloadLocation);
-        verify(repository).existsBySlug(payloadLocation.getSlug());
-        verifyNoMoreInteractions(repository);
+      assertThat(locations).isEmpty();
     }
 
     @Test
-    @Tag("Init")
-    @DisplayName("Should fetch locations from API during initialization")
-    public void init_invokesApi() {
-        var payload = LocationPayload.builder()
-                .name("test")
-                .slug("test")
-                .build();
+    @DisplayName("Should return list of locations when locations exist")
+    public void getAllLocations_notEmpty() {
+      doReturn(List.of(location)).when(repository).findAll();
 
-        var locationForSave = Location.builder()
-                .slug(payload.slug())
-                .name(payload.name())
-                .build();
+      var locations = service.getAllLocations();
 
-        var savedLocation = Location.builder()
-                .id(1L)
-                .slug(payload.slug())
-                .name(payload.name())
-                .build();
+      assertThat(locations).contains(locationDTO);
+    }
+  }
 
-        doReturn(List.of(payload)).when(kudaGoApiClient).fetchLocations();
-        doReturn(savedLocation).when(repository).save(locationForSave);
+  @Nested
+  @Tag("GetById")
+  @DisplayName("Get location by ID tests")
+  class GetLocationByIdTest {
 
-        service.init();
+    @Test
+    @DisplayName("Should return location when found by ID")
+    public void getById_success() {
+      doReturn(Optional.of(location)).when(repository).findById(location.getId());
 
-        verify(kudaGoApiClient).fetchLocations();
-        verifyNoMoreInteractions(kudaGoApiClient);
+      var receivedLocation = service.getLocationById(location.getId());
+
+      assertThat(receivedLocation).isEqualTo(locationDTO);
     }
 
-    @Nested
-    @Tag("GetAll")
-    @DisplayName("Get all locations tests")
-    class GetAllLocationsTests {
+    @Test
+    @DisplayName("Should throw exception when location not found by ID")
+    public void getById_notFound() {
+      assertThatExceptionOfType(LocationNotFoundException.class)
+          .isThrownBy(() -> service.getLocationById(location.getId()))
+          .withMessage("location.not_found");
+    }
+  }
 
-        @Test
-        @DisplayName("Should return empty list when no locations exist")
-        public void getAllLocations_empty() {
-            doReturn(List.of()).when(repository).findAll();
+  @Nested
+  @Tag("Update")
+  @DisplayName("Update location tests")
+  class UpdateLocationTest {
 
-            var locations = service.getAllLocations();
+    @Test
+    @DisplayName("Should successfully update an existing location")
+    public void updateLocation_success() {
+      var changedLocation = Location.builder()
+          .name(location.getName() + "-updated")
+          .slug(location.getSlug())
+          .id(location.getId())
+          .build();
 
-            assertThat(locations).isEmpty();
-        }
+      var changedLocationDTO = LocationDTO.builder()
+          .name(location.getName() + "-updated")
+          .slug(location.getSlug())
+          .id(location.getId())
+          .build();
 
-        @Test
-        @DisplayName("Should return list of locations when locations exist")
-        public void getAllLocations_notEmpty() {
-            doReturn(List.of(location)).when(repository).findAll();
+      doReturn(Optional.of(changedLocation)).when(repository).findById(changedLocation.getId());
+      doReturn(false).when(repository).existsBySlug(changedLocation.getSlug());
+      doReturn(changedLocation).when(repository).save(changedLocation);
 
-            var locations = service.getAllLocations();
+      var updatedLocation = service.updateLocation(location.getId(),
+          changedLocation.getSlug(), changedLocation.getName());
 
-            assertThat(locations).contains(locationDTO);
-        }
+      assertThat(changedLocationDTO).isEqualTo(updatedLocation);
+      verify(repository).save(changedLocation);
+      verify(repository).existsBySlug(changedLocation.getSlug());
+      verifyNoMoreInteractions(repository);
     }
 
-    @Nested
-    @Tag("GetById")
-    @DisplayName("Get location by ID tests")
-    class GetLocationByIdTest {
+    @Test
+    @DisplayName("Should throw exception when updating non-existent location")
+    public void updateLocation_notFound() {
+      var changedLocation = Location.builder()
+          .name(location.getName() + "-updated")
+          .slug(location.getSlug())
+          .id(location.getId())
+          .build();
+      doReturn(Optional.empty()).when(repository).findById(changedLocation.getId());
 
-        @Test
-        @DisplayName("Should return location when found by ID")
-        public void getById_success() {
-            doReturn(Optional.of(location)).when(repository).findById(location.getId());
+      assertThatExceptionOfType(LocationNotFoundException.class)
+          .isThrownBy(() -> service.updateLocation(
+              location.getId(),
+              changedLocation.getSlug(),
+              changedLocation.getName()))
+          .withMessage("location.not_found");
+    }
+  }
 
-            var receivedLocation = service.getLocationById(location.getId());
+  @Nested
+  @Tag("Delete")
+  @DisplayName("Delete location tests")
+  class DeleteLocationTest {
 
-            assertThat(receivedLocation).isEqualTo(locationDTO);
-        }
+    @Test
+    @DisplayName("Should successfully delete an existing location")
+    public void deleteLocation_success() {
+      doReturn(Optional.of(location)).when(repository).findById(location.getId());
 
-        @Test
-        @DisplayName("Should throw exception when location not found by ID")
-        public void getById_notFound() {
-            assertThatExceptionOfType(LocationNotFoundException.class)
-                    .isThrownBy(() -> service.getLocationById(location.getId()))
-                    .withMessage("location.not_found");
-        }
+      service.deleteLocation(location.getId());
+
+      verify(repository).deleteById(location.getId());
+      verifyNoMoreInteractions(repository);
     }
 
-    @Nested
-    @Tag("Update")
-    @DisplayName("Update location tests")
-    class UpdateLocationTest {
+    @Test
+    @DisplayName("Should throw exception when deleting non-existent location")
+    public void deleteLocation_notFound() {
+      doReturn(Optional.empty()).when(repository).findById(location.getId());
 
-        @Test
-        @DisplayName("Should successfully update an existing location")
-        public void updateLocation_success() {
-            var changedLocation = Location.builder()
-                    .name(location.getName() + "-updated")
-                    .slug(location.getSlug())
-                    .id(location.getId())
-                    .build();
-
-            var changedLocationDTO = LocationDTO.builder()
-                    .name(location.getName() + "-updated")
-                    .slug(location.getSlug())
-                    .id(location.getId())
-                    .build();
-
-            doReturn(Optional.of(changedLocation)).when(repository).findById(changedLocation.getId());
-            doReturn(false).when(repository).existsBySlug(changedLocation.getSlug());
-            doReturn(changedLocation).when(repository).save(changedLocation);
-
-            var updatedLocation = service.updateLocation(location.getId(),
-                    changedLocation.getSlug(), changedLocation.getName());
-
-            assertThat(changedLocationDTO).isEqualTo(updatedLocation);
-            verify(repository).save(changedLocation);
-            verify(repository).existsBySlug(changedLocation.getSlug());
-            verifyNoMoreInteractions(repository);
-        }
-
-        @Test
-        @DisplayName("Should throw exception when updating non-existent location")
-        public void updateLocation_notFound() {
-            var changedLocation = Location.builder()
-                    .name(location.getName() + "-updated")
-                    .slug(location.getSlug())
-                    .id(location.getId())
-                    .build();
-            doReturn(Optional.empty()).when(repository).findById(changedLocation.getId());
-
-            assertThatExceptionOfType(LocationNotFoundException.class)
-                    .isThrownBy(() -> service.updateLocation(
-                            location.getId(),
-                            changedLocation.getSlug(),
-                            changedLocation.getName()))
-                    .withMessage("location.not_found");
-        }
+      assertThatExceptionOfType(LocationNotFoundException.class)
+          .isThrownBy(() -> service.deleteLocation(location.getId()))
+          .withMessage("location.not_found");
     }
-
-    @Nested
-    @Tag("Delete")
-    @DisplayName("Delete location tests")
-    class DeleteLocationTest {
-
-        @Test
-        @DisplayName("Should successfully delete an existing location")
-        public void deleteLocation_success() {
-            doReturn(Optional.of(location)).when(repository).findById(location.getId());
-
-            service.deleteLocation(location.getId());
-
-            verify(repository).deleteById(location.getId());
-            verifyNoMoreInteractions(repository);
-        }
-
-        @Test
-        @DisplayName("Should throw exception when deleting non-existent location")
-        public void deleteLocation_notFound() {
-            doReturn(Optional.empty()).when(repository).findById(location.getId());
-
-            assertThatExceptionOfType(LocationNotFoundException.class)
-                    .isThrownBy(() -> service.deleteLocation(location.getId()))
-                    .withMessage("location.not_found");
-        }
-    }
+  }
 }

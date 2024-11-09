@@ -11,10 +11,10 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class LocationObserverImpl implements LocationObserver {
 
-    private final LocationHistoryCaretaker historyCaretaker;
+  private final LocationHistoryCaretaker historyCaretaker;
 
-    @Override
-    public void onLocationChanged(Location location, CrudAction action) {
-        historyCaretaker.saveSnapshot(LocationMemento.createSnapshot(location, action));
-    }
+  @Override
+  public void onLocationChanged(Location location, CrudAction action) {
+    historyCaretaker.saveSnapshot(LocationMemento.createSnapshot(location, action));
+  }
 }

@@ -11,11 +11,11 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class CategoryInitializationCommand implements DataInitializationCommand {
 
-    private final CategoryService categoryService;
+  private final CategoryService categoryService;
 
-    @Override
-    public void execute() {
-        log.info("Executing category initialization command");
-        categoryService.init();
-    }
+  @Override
+  public void execute() {
+    log.info("Executing category initialization command");
+    categoryService.init();
+  }
 }

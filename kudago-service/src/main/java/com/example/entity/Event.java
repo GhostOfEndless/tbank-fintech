@@ -10,13 +10,12 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
+import java.time.Instant;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
-
-import java.time.Instant;
 
 @SuperBuilder
 @Setter
@@ -27,25 +26,25 @@ import java.time.Instant;
 @Table(name = "t_events", schema = "kudago")
 public class Event {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "events_seq_generator")
-    @SequenceGenerator(name = "events_seq_generator", sequenceName = "kudago.events_seq")
-    @Column(unique = true, nullable = false)
-    protected Long id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "events_seq_generator")
+  @SequenceGenerator(name = "events_seq_generator", sequenceName = "kudago.events_seq")
+  @Column(unique = true, nullable = false)
+  protected Long id;
 
-    @Column(name = "c_name", nullable = false)
-    private String name;
+  @Column(name = "c_name", nullable = false)
+  private String name;
 
-    @Column(name = "c_start_date", nullable = false)
-    private Instant startDate;
+  @Column(name = "c_start_date", nullable = false)
+  private Instant startDate;
 
-    @Column(name = "c_price")
-    private String price;
+  @Column(name = "c_price")
+  private String price;
 
-    @Column(name = "c_free", nullable = false)
-    private boolean free;
+  @Column(name = "c_free", nullable = false)
+  private boolean free;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "c_location_id", nullable = false)
-    private Location location;
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "c_location_id", nullable = false)
+  private Location location;
 }

@@ -11,6 +11,8 @@ import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
+import java.util.Collection;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
@@ -20,9 +22,6 @@ import lombok.Setter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
-
-import java.util.Collection;
-import java.util.List;
 
 @Builder
 @Setter
@@ -34,40 +33,40 @@ import java.util.List;
 @Table(name = "t_app_users", schema = "security")
 public class AppUser implements UserDetails {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "app_users_seq_generator")
-    @SequenceGenerator(name = "app_users_seq_generator", sequenceName = "security.app_users_seq")
-    @Column(unique = true, nullable = false)
-    private Long id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "app_users_seq_generator")
+  @SequenceGenerator(name = "app_users_seq_generator", sequenceName = "security.app_users_seq")
+  @Column(unique = true, nullable = false)
+  private Long id;
 
-    @Column(name = "c_display_name", nullable = false)
-    private String displayName;
+  @Column(name = "c_display_name", nullable = false)
+  private String displayName;
 
-    @Column(name = "c_login", unique = true, nullable = false)
-    private String login;
+  @Column(name = "c_login", unique = true, nullable = false)
+  private String login;
 
-    @Column(name = "c_hashed_password", nullable = false)
-    private String hashedPassword;
+  @Column(name = "c_hashed_password", nullable = false)
+  private String hashedPassword;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "c_role", nullable = false)
-    private Role role;
+  @Enumerated(EnumType.STRING)
+  @Column(name = "c_role", nullable = false)
+  private Role role;
 
-    @OneToMany(mappedBy = "appUser", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Token> tokens;
+  @OneToMany(mappedBy = "appUser", cascade = CascadeType.ALL, orphanRemoval = true)
+  private List<Token> tokens;
 
-    @Override
-    public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(new SimpleGrantedAuthority(role.name()));
-    }
+  @Override
+  public Collection<? extends GrantedAuthority> getAuthorities() {
+    return List.of(new SimpleGrantedAuthority(role.name()));
+  }
 
-    @Override
-    public String getPassword() {
-        return hashedPassword;
-    }
+  @Override
+  public String getPassword() {
+    return hashedPassword;
+  }
 
-    @Override
-    public String getUsername() {
-        return login;
-    }
+  @Override
+  public String getUsername() {
+    return login;
+  }
 }

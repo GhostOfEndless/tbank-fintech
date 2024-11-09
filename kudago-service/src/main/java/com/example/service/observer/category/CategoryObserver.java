@@ -5,5 +5,5 @@ import com.example.entity.CrudAction;
 
 public interface CategoryObserver {
 
-    void onLocationChanged(Category category, CrudAction action);
+  void onLocationChanged(Category category, CrudAction action);
 }

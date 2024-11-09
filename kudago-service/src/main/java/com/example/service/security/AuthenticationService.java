@@ -25,80 +25,80 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class AuthenticationService {
 
-    private final AuthenticationManager authenticationManager;
-    private final AppUserRepository appUserRepository;
-    private final TokenRepository tokenRepository;
-    private final PasswordEncoder passwordEncoder;
-    private final JwtService jwtService;
+  private final AuthenticationManager authenticationManager;
+  private final AppUserRepository appUserRepository;
+  private final TokenRepository tokenRepository;
+  private final PasswordEncoder passwordEncoder;
+  private final JwtService jwtService;
 
-    public AuthenticationResponse authenticate(@NonNull AuthenticationRequest request) {
-        authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(
-                        request.login(),
-                        request.password()
-                )
-        );
-        AppUser user = appUserRepository.findByLogin(request.login())
-                .orElseThrow(() -> new UserNotFoundException(request.login()));
+  public AuthenticationResponse authenticate(@NonNull AuthenticationRequest request) {
+    authenticationManager.authenticate(
+        new UsernamePasswordAuthenticationToken(
+            request.login(),
+            request.password()
+        )
+    );
+    AppUser user = appUserRepository.findByLogin(request.login())
+        .orElseThrow(() -> new UserNotFoundException(request.login()));
 
-        var tokens = tokenRepository.findAllByAppUserAndRevoked(user, false);
-        tokens.forEach(token -> token.setRevoked(true));
-        tokenRepository.saveAll(tokens);
+    var tokens = tokenRepository.findAllByAppUserAndRevoked(user, false);
+    tokens.forEach(token -> token.setRevoked(true));
+    tokenRepository.saveAll(tokens);
 
-        String jwtToken = jwtService.generateToken(user, request.rememberMe());
-        Token token = Token.builder()
-                .token(jwtToken)
-                .appUser(user)
-                .build();
-        tokenRepository.save(token);
-        return new AuthenticationResponse(jwtToken);
+    String jwtToken = jwtService.generateToken(user, request.rememberMe());
+    Token token = Token.builder()
+        .token(jwtToken)
+        .appUser(user)
+        .build();
+    tokenRepository.save(token);
+    return new AuthenticationResponse(jwtToken);
+  }
+
+  public AuthenticationResponse register(@NonNull RegistrationRequest request) {
+    appUserRepository.findByLogin(request.login())
+        .ifPresent(appUser -> {
+          throw new UserAlreadyRegisterException(appUser.getLogin());
+        });
+
+    AppUser user = AppUser.builder()
+        .displayName(request.displayName())
+        .login(request.login())
+        .role(Role.USER)
+        .hashedPassword(passwordEncoder.encode(request.password()))
+        .build();
+    appUserRepository.save(user);
+
+    String jwtToken = jwtService.generateToken(user, false);
+    Token token = Token.builder()
+        .token(jwtToken)
+        .appUser(user)
+        .build();
+    tokenRepository.save(token);
+    return new AuthenticationResponse(jwtToken);
+  }
+
+  public void logout(@NonNull Authentication authentication) {
+    var userDetails = (UserDetails) authentication.getPrincipal();
+
+    AppUser user = appUserRepository.findByLogin(userDetails.getUsername())
+        .orElseThrow(() -> new UserNotFoundException(userDetails.getUsername()));
+
+    var tokens = tokenRepository.findAllByAppUserAndRevoked(user, false);
+    tokens.forEach(token -> token.setRevoked(true));
+    tokenRepository.saveAll(tokens);
+  }
+
+  public void changePassword(@NonNull Authentication authentication, @NonNull ChangePasswordRequest request) {
+    if (!request.twoFactorCode().equals("0000")) {
+      throw new InvalidTwoFactorCodeException();
     }
 
-    public AuthenticationResponse register(@NonNull RegistrationRequest request) {
-        appUserRepository.findByLogin(request.login())
-                .ifPresent(appUser -> {
-                    throw new UserAlreadyRegisterException(appUser.getLogin());
-                });
+    var userDetails = (UserDetails) authentication.getPrincipal();
 
-        AppUser user = AppUser.builder()
-                .displayName(request.displayName())
-                .login(request.login())
-                .role(Role.USER)
-                .hashedPassword(passwordEncoder.encode(request.password()))
-                .build();
-        appUserRepository.save(user);
+    AppUser user = appUserRepository.findByLogin(userDetails.getUsername())
+        .orElseThrow(() -> new UserNotFoundException(userDetails.getUsername()));
 
-        String jwtToken = jwtService.generateToken(user, false);
-        Token token = Token.builder()
-                .token(jwtToken)
-                .appUser(user)
-                .build();
-        tokenRepository.save(token);
-        return new AuthenticationResponse(jwtToken);
-    }
-
-    public void logout(@NonNull Authentication authentication) {
-        var userDetails = (UserDetails) authentication.getPrincipal();
-
-        AppUser user = appUserRepository.findByLogin(userDetails.getUsername())
-                .orElseThrow(() -> new UserNotFoundException(userDetails.getUsername()));
-
-        var tokens = tokenRepository.findAllByAppUserAndRevoked(user, false);
-        tokens.forEach(token -> token.setRevoked(true));
-        tokenRepository.saveAll(tokens);
-    }
-
-    public void changePassword(@NonNull Authentication authentication, @NonNull ChangePasswordRequest request) {
-        if (!request.twoFactorCode().equals("0000")) {
-            throw new InvalidTwoFactorCodeException();
-        }
-
-        var userDetails = (UserDetails) authentication.getPrincipal();
-
-        AppUser user = appUserRepository.findByLogin(userDetails.getUsername())
-                .orElseThrow(() -> new UserNotFoundException(userDetails.getUsername()));
-
-        user.setHashedPassword(passwordEncoder.encode(request.newPassword()));
-        appUserRepository.save(user);
-    }
+    user.setHashedPassword(passwordEncoder.encode(request.newPassword()));
+    appUserRepository.save(user);
+  }
 }

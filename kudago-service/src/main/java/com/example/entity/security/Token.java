@@ -27,19 +27,19 @@ import lombok.Setter;
 @NoArgsConstructor
 public class Token {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "tokens_seq_generator")
-    @SequenceGenerator(name = "tokens_seq_generator", sequenceName = "security.tokens_seq")
-    @Column(unique = true, nullable = false)
-    private Long id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "tokens_seq_generator")
+  @SequenceGenerator(name = "tokens_seq_generator", sequenceName = "security.tokens_seq")
+  @Column(unique = true, nullable = false)
+  private Long id;
 
-    @Column(name = "c_token", nullable = false)
-    private String token;
+  @Column(name = "c_token", nullable = false)
+  private String token;
 
-    @Column(name = "c_revoked", nullable = false)
-    private boolean revoked;
+  @Column(name = "c_revoked", nullable = false)
+  private boolean revoked;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "c_app_user_id", nullable = false)
-    private AppUser appUser;
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "c_app_user_id", nullable = false)
+  private AppUser appUser;
 }

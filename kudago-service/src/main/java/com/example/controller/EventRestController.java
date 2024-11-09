@@ -12,6 +12,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Positive;
+import java.time.LocalDate;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ProblemDetail;
@@ -21,9 +23,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.time.LocalDate;
-import java.util.List;
-
 @Tag(name = "События", description = "API для работы с мероприятиями")
 @Validated
 @RestController
@@ -31,105 +30,106 @@ import java.util.List;
 @RequiredArgsConstructor
 public class EventRestController {
 
-    private final EventService eventService;
+  private final EventService eventService;
+  private static final String DEFAULT_LOCATION_CODE = "kzn";
 
-    @Operation(
-            summary = "Получение списка мероприятий (реактивный подход)",
-            description = "Возвращает отфильтрованный список мероприятий с учетом бюджета, валюты и дат"
-    )
-    @ApiResponses(value = {
-            @ApiResponse(
-                    responseCode = "200",
-                    description = "Успешное получение списка мероприятий",
-                    content = @Content(
-                            mediaType = "application/json",
-                            array = @ArraySchema(schema = @Schema(implementation = EventResponse.class))
-                    )
-            ),
-            @ApiResponse(
-                    responseCode = "400",
-                    description = "Некорректные параметры запроса",
-                    content = @Content(
-                            mediaType = "application/json",
-                            schema = @Schema(implementation = ProblemDetail.class)
-                    )
-            ),
-            @ApiResponse(
-                    responseCode = "503",
-                    description = "Сервис временно недоступен",
-                    content = @Content(
-                            mediaType = "application/json",
-                            schema = @Schema(implementation = ProblemDetail.class)
-                    )
-            )
-    })
-    @GetMapping("/reactive")
-    public List<EventResponse> getEventsReactive(
-            @Parameter(description = "Бюджет пользователя (должен быть положительным)")
-            @Positive(message = "{budget.should_be_positive}")
-            @RequestParam Float budget,
+  @Operation(
+      summary = "Получение списка мероприятий (реактивный подход)",
+      description = "Возвращает отфильтрованный список мероприятий с учетом бюджета, валюты и дат"
+  )
+  @ApiResponses(value = {
+      @ApiResponse(
+          responseCode = "200",
+          description = "Успешное получение списка мероприятий",
+          content = @Content(
+              mediaType = "application/json",
+              array = @ArraySchema(schema = @Schema(implementation = EventResponse.class))
+          )
+      ),
+      @ApiResponse(
+          responseCode = "400",
+          description = "Некорректные параметры запроса",
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(implementation = ProblemDetail.class)
+          )
+      ),
+      @ApiResponse(
+          responseCode = "503",
+          description = "Сервис временно недоступен",
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(implementation = ProblemDetail.class)
+          )
+      )
+  })
+  @GetMapping("/reactive")
+  public List<EventResponse> getEventsReactive(
+      @Parameter(description = "Бюджет пользователя (должен быть положительным)")
+      @Positive(message = "{budget.should_be_positive}")
+      @RequestParam Float budget,
 
-            @Parameter(description = "Код валюты (3 буквы)", example = "RUB")
-            @Pattern(message = "{currency_code.invalid_format}", regexp = "^[A-Za-z]{3}$")
-            @RequestParam String currency,
+      @Parameter(description = "Код валюты (3 буквы)", example = "RUB")
+      @Pattern(message = "{currency_code.invalid_format}", regexp = "^[A-Za-z]{3}$")
+      @RequestParam String currency,
 
-            @Parameter(description = "Начальная дата (формат: YYYY-MM-DD)", example = "2024-10-01")
-            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
-            @RequestParam(required = false) LocalDate dateFrom,
+      @Parameter(description = "Начальная дата (формат: YYYY-MM-DD)", example = "2024-10-01")
+      @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+      @RequestParam(required = false) LocalDate dateFrom,
 
-            @Parameter(description = "Конечная дата (формат: YYYY-MM-DD)", example = "2024-12-31")
-            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
-            @RequestParam(required = false) LocalDate dateTo) {
-        return eventService.fetchEventsReactive(budget, currency, dateFrom, dateTo, "kzn").block();
-    }
+      @Parameter(description = "Конечная дата (формат: YYYY-MM-DD)", example = "2024-12-31")
+      @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+      @RequestParam(required = false) LocalDate dateTo) {
+    return eventService.fetchEventsReactive(budget, currency, dateFrom, dateTo, DEFAULT_LOCATION_CODE).block();
+  }
 
-    @Operation(
-            summary = "Получение списка мероприятий (асинхронный подход)",
-            description = "Возвращает отфильтрованный список мероприятий с учетом бюджета, валюты и дат"
-    )
-    @ApiResponses(value = {
-            @ApiResponse(
-                    responseCode = "200",
-                    description = "Успешное получение списка мероприятий",
-                    content = @Content(
-                            mediaType = "application/json",
-                            array = @ArraySchema(schema = @Schema(implementation = EventResponse.class))
-                    )
-            ),
-            @ApiResponse(
-                    responseCode = "400",
-                    description = "Некорректные параметры запроса",
-                    content = @Content(
-                            mediaType = "application/json",
-                            schema = @Schema(implementation = ProblemDetail.class)
-                    )
-            ),
-            @ApiResponse(
-                    responseCode = "503",
-                    description = "Сервис временно недоступен",
-                    content = @Content(
-                            mediaType = "application/json",
-                            schema = @Schema(implementation = ProblemDetail.class)
-                    )
-            )
-    })
-    @GetMapping("/future")
-    public List<EventResponse> getEventsFuture(
-            @Parameter(description = "Бюджет пользователя (должен быть положительным)")
-            @Positive(message = "{budget.should_be_positive}")
-            @RequestParam Float budget,
+  @Operation(
+      summary = "Получение списка мероприятий (асинхронный подход)",
+      description = "Возвращает отфильтрованный список мероприятий с учетом бюджета, валюты и дат"
+  )
+  @ApiResponses(value = {
+      @ApiResponse(
+          responseCode = "200",
+          description = "Успешное получение списка мероприятий",
+          content = @Content(
+              mediaType = "application/json",
+              array = @ArraySchema(schema = @Schema(implementation = EventResponse.class))
+          )
+      ),
+      @ApiResponse(
+          responseCode = "400",
+          description = "Некорректные параметры запроса",
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(implementation = ProblemDetail.class)
+          )
+      ),
+      @ApiResponse(
+          responseCode = "503",
+          description = "Сервис временно недоступен",
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(implementation = ProblemDetail.class)
+          )
+      )
+  })
+  @GetMapping("/future")
+  public List<EventResponse> getEventsFuture(
+      @Parameter(description = "Бюджет пользователя (должен быть положительным)")
+      @Positive(message = "{budget.should_be_positive}")
+      @RequestParam Float budget,
 
-            @Parameter(description = "Код валюты (3 буквы)", example = "RUB")
-            @Pattern(message = "{currency_code.invalid_format}", regexp = "^[A-Za-z]{3}$")
-            @RequestParam String currency,
+      @Parameter(description = "Код валюты (3 буквы)", example = "RUB")
+      @Pattern(message = "{currency_code.invalid_format}", regexp = "^[A-Za-z]{3}$")
+      @RequestParam String currency,
 
-            @Parameter(description = "Начальная дата (формат: YYYY-MM-DD)", example = "2024-10-01")
-            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
-            @RequestParam(required = false) LocalDate dateFrom,
+      @Parameter(description = "Начальная дата (формат: YYYY-MM-DD)", example = "2024-10-01")
+      @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+      @RequestParam(required = false) LocalDate dateFrom,
 
-            @Parameter(description = "Конечная дата (формат: YYYY-MM-DD)", example = "2024-12-31")
-            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
-            @RequestParam(required = false) LocalDate dateTo) {
-        return eventService.fetchEventsFuture(budget, currency, dateFrom, dateTo, "kzn").join();
-    }
+      @Parameter(description = "Конечная дата (формат: YYYY-MM-DD)", example = "2024-12-31")
+      @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+      @RequestParam(required = false) LocalDate dateTo) {
+    return eventService.fetchEventsFuture(budget, currency, dateFrom, dateTo, DEFAULT_LOCATION_CODE).join();
+  }
 }

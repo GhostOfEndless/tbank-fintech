@@ -4,8 +4,8 @@ import lombok.Builder;
 
 @Builder
 public record AuthenticationRequest(
-        String login,
-        String password,
-        boolean rememberMe
+    String login,
+    String password,
+    boolean rememberMe
 ) {
 }

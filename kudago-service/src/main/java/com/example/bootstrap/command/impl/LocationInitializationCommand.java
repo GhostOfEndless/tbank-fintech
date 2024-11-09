@@ -12,13 +12,13 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class LocationInitializationCommand implements DataInitializationCommand {
 
-    private final LocationService locationService;
-    private final EventService eventService;
+  private final LocationService locationService;
+  private final EventService eventService;
 
-    @Override
-    public void execute() {
-        log.info("Executing location initialization command");
-        locationService.init();
-        eventService.init();
-    }
+  @Override
+  public void execute() {
+    log.info("Executing location initialization command");
+    locationService.init();
+    eventService.init();
+  }
 }

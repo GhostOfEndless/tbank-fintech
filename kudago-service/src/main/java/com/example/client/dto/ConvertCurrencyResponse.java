@@ -4,8 +4,8 @@ import lombok.Builder;
 
 @Builder
 public record ConvertCurrencyResponse(
-        String fromCurrency,
-        String toCurrency,
-        Float convertedAmount
+    String fromCurrency,
+    String toCurrency,
+    Float convertedAmount
 ) {
 }

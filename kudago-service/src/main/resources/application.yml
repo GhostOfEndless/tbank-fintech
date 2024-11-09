@@ -10,6 +10,7 @@ logging:
 kudago:
   max-retries: 3
   retry-delay: 3000
+  page-size: 100
   base-url: https://kudago.com/public-api/v1.4
 
 currency-service:
@@ -28,10 +29,15 @@ spring:
   profiles:
     active: prod
 
+async:
+  pool-size: 3
+  capacity: 100
+
 data-loading:
   threads: 2
   interval: 3600 # in seconds
   timeout: 120 # in seconds
+  termination-timeout: 60 # in seconds
 
 jwt:
   secret: ${JWT_SECRET:J6GOtcwC2NJI1l0VkHu20PacPFGTxpirBxWwynoHjsc=}

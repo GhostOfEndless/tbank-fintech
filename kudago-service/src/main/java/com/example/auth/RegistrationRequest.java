@@ -4,8 +4,8 @@ import lombok.Builder;
 
 @Builder
 public record RegistrationRequest(
-        String displayName,
-        String login,
-        String password
+    String displayName,
+    String login,
+    String password
 ) {
 }

@@ -24,15 +24,15 @@ import lombok.experimental.SuperBuilder;
 @Table(name = "t_categories", schema = "kudago")
 public class Category {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "categories_seq_generator")
-    @SequenceGenerator(name = "categories_seq_generator", sequenceName = "kudago.categories_seq")
-    @Column(unique = true, nullable = false)
-    protected Long id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "categories_seq_generator")
+  @SequenceGenerator(name = "categories_seq_generator", sequenceName = "kudago.categories_seq")
+  @Column(unique = true, nullable = false)
+  protected Long id;
 
-    @Column(name = "c_slug", nullable = false, unique = true)
-    private String slug;
+  @Column(name = "c_slug", nullable = false, unique = true)
+  private String slug;
 
-    @Column(name = "c_name", nullable = false)
-    private String name;
+  @Column(name = "c_name", nullable = false)
+  private String name;
 }
