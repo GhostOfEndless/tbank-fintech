@@ -1,11 +1,21 @@
 package com.example.config;
 
+import com.example.exception.entity.UserNotFoundException;
+import com.example.repository.security.AppUserRepository;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import java.time.Duration;
@@ -16,7 +26,34 @@ import java.util.concurrent.ScheduledExecutorService;
 
 @EnableAsync
 @Configuration
+@RequiredArgsConstructor
 public class ApplicationConfig {
+
+    private final AppUserRepository appUserRepository;
+
+    @Bean
+    public UserDetailsService userDetailsService() {
+        return login -> appUserRepository.findByLogin(login)
+                .orElseThrow(() -> new UserNotFoundException(login));
+    }
+
+    @Bean
+    public AuthenticationProvider authenticationProvider() {
+        var authProvider = new DaoAuthenticationProvider();
+        authProvider.setUserDetailsService(userDetailsService());
+        authProvider.setPasswordEncoder(passwordEncoder());
+        return authProvider;
+    }
+
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
+
+    @Bean
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
+        return config.getAuthenticationManager();
+    }
 
     @Bean
     public WebClient kudaGoWebClient(@Value("${kudago.base-url}") String uri) {

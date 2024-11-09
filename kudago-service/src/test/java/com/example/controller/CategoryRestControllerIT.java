@@ -43,6 +43,33 @@ public class CategoryRestControllerIT extends BaseIT {
             Arguments.of(new CategoryPayload("test", "a".repeat(51)))
     );
 
+    @SneakyThrows
+    private Category createCategory(String slug, String name) {
+        var payload = CategoryPayload.builder()
+                .slug(slug)
+                .name(name)
+                .build();
+
+        var mvcResponse = mockMvc.perform(post(uri)
+                        .header("Authorization", adminBearerToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(payload)))
+                .andExpectAll(
+                        status().isCreated(),
+                        content().contentType(MediaType.APPLICATION_JSON))
+                .andReturn()
+                .getResponse();
+
+        return objectMapper.readValue(mvcResponse.getContentAsString(), Category.class);
+    }
+
+    @SneakyThrows
+    private void deleteCategory(Long id) {
+        mockMvc.perform(delete(uri + "/" + id)
+                        .header("Authorization", adminBearerToken))
+                .andExpect(status().isNoContent());
+    }
+
     @Nested
     @Tag("GetAll")
     @DisplayName("Get all categories")
@@ -52,7 +79,8 @@ public class CategoryRestControllerIT extends BaseIT {
         @Test
         @DisplayName("Should return empty list when no categories exist")
         public void getAllCategories_empty() {
-            var mvcResponse = mockMvc.perform(get(uri))
+            var mvcResponse = mockMvc.perform(get(uri)
+                            .header("Authorization", userBearerToken))
                     .andExpectAll(
                             status().isOk(),
                             content().contentType(MediaType.APPLICATION_JSON))
@@ -72,7 +100,8 @@ public class CategoryRestControllerIT extends BaseIT {
         public void getAllCategories_notEmpty() {
             var createdCategory = createCategory("test", "Test Category");
 
-            var mvcResponse = mockMvc.perform(get(uri))
+            var mvcResponse = mockMvc.perform(get(uri)
+                            .header("Authorization", adminBearerToken))
                     .andExpectAll(
                             status().isOk(),
                             content().contentType(MediaType.APPLICATION_JSON))
@@ -92,7 +121,6 @@ public class CategoryRestControllerIT extends BaseIT {
         }
     }
 
-
     @Nested
     @Tag("GetById")
     @DisplayName("Get category by id")
@@ -104,7 +132,8 @@ public class CategoryRestControllerIT extends BaseIT {
         public void getCategoryById_success() {
             var createdCategory = createCategory("test", "Test Category");
 
-            var mvcResponse = mockMvc.perform(get(uri + "/" + createdCategory.getId()))
+            var mvcResponse = mockMvc.perform(get(uri + "/" + createdCategory.getId())
+                            .header("Authorization", adminBearerToken))
                     .andExpectAll(
                             status().isOk(),
                             content().contentType(MediaType.APPLICATION_JSON))
@@ -122,7 +151,8 @@ public class CategoryRestControllerIT extends BaseIT {
         @Test
         @DisplayName("Should return 404 when category doesn't exist")
         public void getCategoryById_notFound() {
-            mockMvc.perform(get(uri + "/1"))
+            mockMvc.perform(get(uri + "/1")
+                            .header("Authorization", userBearerToken))
                     .andExpectAll(
                             status().isNotFound(),
                             content().contentType(MediaType.APPLICATION_PROBLEM_JSON));
@@ -134,6 +164,10 @@ public class CategoryRestControllerIT extends BaseIT {
     @DisplayName("Create category")
     class CreateCategoryTest {
 
+        public static Stream<Arguments> provideInvalidCategoryPayload() {
+            return invalidCategoryPayload.get();
+        }
+
         @SneakyThrows
         @Test
         @DisplayName("Should create category with valid payload")
@@ -144,6 +178,7 @@ public class CategoryRestControllerIT extends BaseIT {
                     .build();
 
             var mvcResponse = mockMvc.perform(post(uri)
+                            .header("Authorization", adminBearerToken)
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(payload)))
                     .andExpectAll(
@@ -167,15 +202,12 @@ public class CategoryRestControllerIT extends BaseIT {
         @MethodSource("provideInvalidCategoryPayload")
         public void createCategory_badRequest(CategoryPayload payload) {
             mockMvc.perform(post(uri)
+                            .header("Authorization", userBearerToken)
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(payload)))
                     .andExpectAll(
                             status().isBadRequest(),
                             content().contentType(MediaType.APPLICATION_PROBLEM_JSON));
-        }
-
-        public static Stream<Arguments> provideInvalidCategoryPayload() {
-            return invalidCategoryPayload.get();
         }
     }
 
@@ -183,6 +215,10 @@ public class CategoryRestControllerIT extends BaseIT {
     @Tag("Update")
     @DisplayName("Update category")
     class UpdateCategoryTest {
+
+        public static Stream<Arguments> provideInvalidCategoryPayload() {
+            return invalidCategoryPayload.get();
+        }
 
         @SneakyThrows
         @Test
@@ -196,6 +232,7 @@ public class CategoryRestControllerIT extends BaseIT {
                     .build();
 
             var mvcResponse = mockMvc.perform(put(uri + "/" + createdCategory.getId())
+                            .header("Authorization", adminBearerToken)
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(payload)))
                     .andExpectAll(
@@ -214,7 +251,6 @@ public class CategoryRestControllerIT extends BaseIT {
             deleteCategory(createdCategory.getId());
         }
 
-
         @SneakyThrows
         @ParameterizedTest
         @DisplayName("Should return 400 when update payload is invalid")
@@ -223,6 +259,7 @@ public class CategoryRestControllerIT extends BaseIT {
             var createdCategory = createCategory("old", "Old Name");
 
             mockMvc.perform(put(uri + "/" + createdCategory.getId())
+                            .header("Authorization", userBearerToken)
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(updatePayload)))
                     .andExpectAll(
@@ -242,15 +279,12 @@ public class CategoryRestControllerIT extends BaseIT {
                     .build();
 
             mockMvc.perform(put(uri + "/1")
+                            .header("Authorization", adminBearerToken)
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(updatePayload)))
                     .andExpectAll(
                             status().isNotFound(),
                             content().contentType(MediaType.APPLICATION_PROBLEM_JSON));
-        }
-
-        public static Stream<Arguments> provideInvalidCategoryPayload() {
-            return invalidCategoryPayload.get();
         }
     }
 
@@ -267,7 +301,8 @@ public class CategoryRestControllerIT extends BaseIT {
 
             deleteCategory(createdCategory.getId());
 
-            mockMvc.perform(get(uri + "/" + createdCategory.getId()))
+            mockMvc.perform(get(uri + "/" + createdCategory.getId())
+                            .header("Authorization", adminBearerToken))
                     .andExpectAll(
                             status().isNotFound(),
                             content().contentType(MediaType.APPLICATION_PROBLEM_JSON));
@@ -277,35 +312,11 @@ public class CategoryRestControllerIT extends BaseIT {
         @Test
         @DisplayName("Should return 404 when deleting non-existent category")
         public void deleteCategory_notFound() {
-            mockMvc.perform(delete(uri + "/1"))
+            mockMvc.perform(delete(uri + "/1")
+                            .header("Authorization", adminBearerToken))
                     .andExpectAll(
                             status().isNotFound(),
                             content().contentType(MediaType.APPLICATION_PROBLEM_JSON));
         }
-    }
-
-    @SneakyThrows
-    private Category createCategory(String slug, String name) {
-        var payload = CategoryPayload.builder()
-                .slug(slug)
-                .name(name)
-                .build();
-
-        var mvcResponse = mockMvc.perform(post(uri)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(payload)))
-                .andExpectAll(
-                        status().isCreated(),
-                        content().contentType(MediaType.APPLICATION_JSON))
-                .andReturn()
-                .getResponse();
-
-        return objectMapper.readValue(mvcResponse.getContentAsString(), Category.class);
-    }
-
-    @SneakyThrows
-    private void deleteCategory(Long id) {
-        mockMvc.perform(delete(uri + "/" + id))
-                .andExpect(status().isNoContent());
     }
 }

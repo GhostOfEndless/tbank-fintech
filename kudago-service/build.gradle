@@ -19,14 +19,21 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-validation'
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'org.springframework.boot:spring-boot-starter-webflux'
+    implementation 'org.springframework.boot:spring-boot-starter-security'
 
     // other spring libs
     implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.6.0'
     implementation 'org.springframework.retry:spring-retry:2.0.10'
     implementation 'org.postgresql:postgresql:42.7.4'
 
+    //    jwt
+    implementation 'io.jsonwebtoken:jjwt-api:0.12.6'
+    implementation 'io.jsonwebtoken:jjwt-impl:0.12.6'
+    implementation 'io.jsonwebtoken:jjwt-jackson:0.12.6'
+
     // utils
     implementation 'com.google.guava:guava:33.3.1-jre'
+    implementation 'org.jspecify:jspecify:1.0.0'
     annotationProcessor 'org.hibernate:hibernate-jpamodelgen:6.6.1.Final'
     implementation project(':log-aspect')
 

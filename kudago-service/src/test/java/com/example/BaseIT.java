@@ -1,5 +1,7 @@
 package com.example;
 
+import com.example.auth.AuthenticationRequest;
+import com.example.service.security.AuthenticationService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import liquibase.Contexts;
 import liquibase.LabelExpression;
@@ -9,6 +11,7 @@ import liquibase.database.DatabaseFactory;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.resource.DirectoryResourceAccessor;
 import lombok.SneakyThrows;
+import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -34,6 +37,24 @@ public abstract class BaseIT {
     @Autowired
     protected ObjectMapper objectMapper;
 
+    @Autowired
+    protected AuthenticationService authenticationService;
+
+    protected static String userBearerToken;
+    protected static String adminBearerToken;
+
+    protected static final AuthenticationRequest userRequest = new AuthenticationRequest(
+            "user",
+            "password",
+            false
+    );
+
+    protected static final AuthenticationRequest adminRequest = new AuthenticationRequest(
+            "admin",
+            "password",
+            false
+    );
+
     private static final PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:17")
             .withUsername("user")
             .withPassword("password")
@@ -50,7 +71,7 @@ public abstract class BaseIT {
                 .findCorrectDatabaseImplementation(new JdbcConnection(connection));
 
         Liquibase liquibase = new Liquibase(
-                "db-changelog.yaml",
+                "test-changelog.yaml",
                 new DirectoryResourceAccessor(path),
                 database);
 
@@ -63,5 +84,16 @@ public abstract class BaseIT {
         postgres.start();
         runMigrations();
         registry.add("spring.datasource.url", postgres::getJdbcUrl);
+    }
+
+    @BeforeEach
+    public void getToken() {
+        if (userBearerToken == null) {
+            userBearerToken = "Bearer %s".formatted(authenticationService.authenticate(userRequest).token());
+        }
+
+        if (adminBearerToken == null) {
+            adminBearerToken = "Bearer %s".formatted(authenticationService.authenticate(adminRequest).token());
+        }
     }
 }

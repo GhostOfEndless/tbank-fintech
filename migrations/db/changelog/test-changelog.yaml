@@ -1,0 +1,7 @@
+databaseChangeLog:
+  - include:
+      file: kudago-changelog.sql
+  - include:
+      file: security-changelog.sql
+  - include:
+      file: init-security-changelog.sql

@@ -5,12 +5,16 @@ import com.example.exception.DateBoundsException;
 import com.example.exception.InvalidCurrencyException;
 import com.example.exception.ServiceUnavailableException;
 import com.example.exception.entity.EntityNotFoundException;
+import com.example.exception.entity.InvalidTwoFactorCodeException;
 import com.example.exception.entity.RelatedEntityNotFoundException;
 import com.example.exception.entity.SlugAlreadyExistsException;
+import com.example.exception.entity.UserAlreadyRegisterException;
+import com.example.exception.entity.UserNotFoundException;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.jspecify.annotations.NonNull;
 import org.springframework.context.MessageSource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
@@ -147,6 +151,35 @@ public class BadRequestControllerAdvice {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST,
                         messageSource.getMessage(exception.getMessage(), new Object[]{exception.getId()},
+                                exception.getMessage(), locale)));
+    }
+
+    @ExceptionHandler(UserNotFoundException.class)
+    public ResponseEntity<ProblemDetail> handleUserNotFoundException(@NonNull UserNotFoundException exception,
+                                                                     Locale locale) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST,
+                        messageSource.getMessage(exception.getMessage(), new Object[]{exception.getLogin()},
+                                exception.getMessage(), locale)));
+    }
+
+    @ExceptionHandler(UserAlreadyRegisterException.class)
+    public ResponseEntity<ProblemDetail> handleUserAlreadyRegisterException(@NonNull UserAlreadyRegisterException exception,
+                                                                            Locale locale) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST,
+                        messageSource.getMessage(exception.getMessage(), new Object[]{exception.getLogin()},
+                                exception.getMessage(), locale)));
+    }
+
+    @ExceptionHandler(InvalidTwoFactorCodeException.class)
+    public ResponseEntity<ProblemDetail> handleInvalidTwoFactorCodeException(
+            @NonNull InvalidTwoFactorCodeException exception,
+            Locale locale
+    ) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .body(ProblemDetail.forStatusAndDetail(HttpStatus.UNAUTHORIZED,
+                        messageSource.getMessage(exception.getMessage(), new Object[]{},
                                 exception.getMessage(), locale)));
     }
 }

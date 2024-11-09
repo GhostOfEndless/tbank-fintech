@@ -32,3 +32,8 @@ data-loading:
   threads: 2
   interval: 3600 # in seconds
   timeout: 120 # in seconds
+
+jwt:
+  secret: ${JWT_SECRET:J6GOtcwC2NJI1l0VkHu20PacPFGTxpirBxWwynoHjsc=}
+  ttl: 600 # 10 minutes in seconds
+  long-ttl: 2592000 # 30 days in seconds

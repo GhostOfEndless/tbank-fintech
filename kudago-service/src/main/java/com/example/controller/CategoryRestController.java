@@ -4,12 +4,13 @@ import com.example.aspect.LogExecutionTime;
 import com.example.controller.payload.CategoryPayload;
 import com.example.entity.Category;
 import com.example.entity.history.CategoryMemento;
-import com.example.service.history.CategoryHistoryCaretaker;
 import com.example.service.CategoryService;
+import com.example.service.history.CategoryHistoryCaretaker;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -46,18 +47,21 @@ public class CategoryRestController {
     }
 
     @PostMapping
+    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<Category> createCategory(@Valid @RequestBody CategoryPayload category) {
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(categoryService.createCategory(category.slug(), category.name()));
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasAuthority('ADMIN')")
     public Category updateCategory(@PathVariable Long id,
                                    @Valid @RequestBody CategoryPayload category) {
         return categoryService.updateCategory(id, category.slug(), category.name());
     }
 
     @DeleteMapping("/{id}")
+     @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<Void> deleteCategory(@PathVariable Long id) {
         categoryService.deleteCategory(id);
         return ResponseEntity.noContent().build();
