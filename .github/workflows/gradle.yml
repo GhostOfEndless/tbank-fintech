@@ -6,6 +6,11 @@ on:
   push:
     branches: [ main ]
 
+permissions:
+  contents: read
+  packages: write
+  pull-requests: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -88,6 +93,7 @@ jobs:
     name: Package
     permissions:
       packages: write
+      contents: read
       pull-requests: write
 
     steps:
