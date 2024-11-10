@@ -112,4 +112,4 @@ jobs:
           context: .
           file: ./docker/kudago-service.Dockerfile
           push: true
-          tags: ghost-of-endless/kudago-service:latest
+          tags: ghcr.io/${{ github.repository }}:latest

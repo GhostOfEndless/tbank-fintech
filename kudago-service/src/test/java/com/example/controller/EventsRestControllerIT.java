@@ -25,6 +25,7 @@ import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
+import static com.github.tomakehurst.wiremock.client.WireMock.equalTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.get;
 import static com.github.tomakehurst.wiremock.client.WireMock.okJson;
 import static com.github.tomakehurst.wiremock.client.WireMock.post;
@@ -81,7 +82,8 @@ public class EventsRestControllerIT extends BaseIT {
   @Test
   @DisplayName("Should return non empty result for CompletableFuture realisation")
   void getEventsFuture() {
-    registerStubs();
+    registerEventsStubs();
+    registerCurrencyStubs();
 
     var mvcResponse = getResponse("/future", 200, MediaType.APPLICATION_JSON);
 
@@ -96,7 +98,8 @@ public class EventsRestControllerIT extends BaseIT {
   @Test
   @DisplayName("Should return non empty result for Project Reactor realisation")
   void getEventsReactive() {
-    registerStubs();
+    registerEventsStubs();
+    registerCurrencyStubs();
 
     var mvcResponse = getResponse("/reactive", 200, MediaType.APPLICATION_JSON);
 
@@ -144,22 +147,11 @@ public class EventsRestControllerIT extends BaseIT {
   @MethodSource("getInvalidResponses")
   @DisplayName("Should return 400 status while request is invalid")
   void getEventsReactive_badRequest(String budget, String currency, String dateFrom, String dateTo) {
-    wireMockServer.stubFor(get(urlPathEqualTo("/events/"))
-        .willReturn(aResponse().proxiedFrom("https://kudago.com/public-api/v1.4")));
+    registerEventsStubs();
 
     wireMockServer.stubFor(post(urlEqualTo("/convert"))
         .willReturn(aResponse()
-            .withStatus(400)
-            .withBody("""
-                {
-                    "type":"about:blank",
-                    "title":"Bad Request",
-                    "status":400,
-                    "detail":"Неверный ISO код валюты 'UGF'",
-                    "instance":"/api/v1/currencies/convert"
-                }
-                """)
-            .withHeader("Content-Type", "application/problem+json")));
+            .withStatus(400)));
 
     mockMvc.perform(MockMvcRequestBuilders.get(uri + "/reactive")
             .header("Authorization", userBearerToken)
@@ -187,18 +179,33 @@ public class EventsRestControllerIT extends BaseIT {
         .getResponse();
   }
 
-  private void registerStubs() {
+  private void registerCurrencyStubs() {
     wireMockServer.stubFor(post(urlEqualTo("/convert"))
         .willReturn(okJson("""
             {
-                "fromCurrency":"RUB",
-                "toCurrency":"RUB",
                 "convertedAmount":1.0
             }
             """)));
+  }
 
+  private void registerEventsStubs() {
     wireMockServer.stubFor(get(urlPathEqualTo("/events/"))
-        .willReturn(aResponse().proxiedFrom("https://kudago.com/public-api/v1.4")));
+        .withQueryParam("page", equalTo("1"))
+        .willReturn(okJson("""
+            {
+                "results": [
+                    {
+                        "price": "",
+                        "is_free": true
+                    }
+                ]
+            }
+            """)));
+
+    wireMockServer.stubFor(post(urlEqualTo("/events/"))
+        .withQueryParam("page", equalTo("2"))
+        .willReturn(aResponse()
+            .withStatus(404)));
   }
 
   private void registerStubs503() {
