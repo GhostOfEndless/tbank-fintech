@@ -15,6 +15,9 @@ import org.openjdk.jmh.annotations.TearDown;
 import org.openjdk.jmh.annotations.Warmup;
 
 @State(Scope.Benchmark)
+@Fork(value = 1)
+@Warmup(iterations = 3)
+@Measurement(iterations = 10)
 public class QueueBenchmark {
 
   // RabbitMQ
@@ -70,9 +73,6 @@ public class QueueBenchmark {
   @Benchmark
   @BenchmarkMode(Mode.AverageTime)
   @OutputTimeUnit(TimeUnit.MILLISECONDS)
-  @Fork(value = 1)
-  @Warmup(iterations = 3)
-  @Measurement(iterations = 10)
   public void simpleRabbitProducerLatency() {
     simpleRabbitRunner.producerList()
         .forEach(Producer::produceMessage);
@@ -81,9 +81,6 @@ public class QueueBenchmark {
   @Benchmark
   @BenchmarkMode(Mode.AverageTime)
   @OutputTimeUnit(TimeUnit.MILLISECONDS)
-  @Fork(value = 1)
-  @Warmup(iterations = 3)
-  @Measurement(iterations = 10)
   public void simpleRabbitConsumerLatency() {
     simpleRabbitRunner.consumerList()
         .forEach(Consumer::consumeMessage);
@@ -92,9 +89,6 @@ public class QueueBenchmark {
   @Benchmark
   @BenchmarkMode(Mode.Throughput)
   @OutputTimeUnit(TimeUnit.SECONDS)
-  @Fork(value = 1)
-  @Warmup(iterations = 3)
-  @Measurement(iterations = 10)
   public void simpleRabbitThroughput() {
     simpleRabbitRunner.run();
   }
@@ -102,9 +96,6 @@ public class QueueBenchmark {
   @Benchmark
   @BenchmarkMode(Mode.AverageTime)
   @OutputTimeUnit(TimeUnit.MILLISECONDS)
-  @Fork(value = 1)
-  @Warmup(iterations = 3)
-  @Measurement(iterations = 10)
   public void loadBalancingRabbitConfigProducerLatency() {
     loadBalancingRabbitRunner.producerList()
         .forEach(Producer::produceMessage);
@@ -113,9 +104,6 @@ public class QueueBenchmark {
   @Benchmark
   @BenchmarkMode(Mode.AverageTime)
   @OutputTimeUnit(TimeUnit.MILLISECONDS)
-  @Fork(value = 1)
-  @Warmup(iterations = 3)
-  @Measurement(iterations = 10)
   public void loadBalancingRabbitConfigConsumerLatency() {
     loadBalancingRabbitRunner.consumerList()
         .forEach(Consumer::consumeMessage);
@@ -124,9 +112,6 @@ public class QueueBenchmark {
   @Benchmark
   @BenchmarkMode(Mode.Throughput)
   @OutputTimeUnit(TimeUnit.SECONDS)
-  @Fork(value = 1)
-  @Warmup(iterations = 3)
-  @Measurement(iterations = 10)
   public void loadBalancingRabbitConfigThroughput() {
     loadBalancingRabbitRunner.run();
   }
@@ -134,9 +119,6 @@ public class QueueBenchmark {
   @Benchmark
   @BenchmarkMode(Mode.AverageTime)
   @OutputTimeUnit(TimeUnit.MILLISECONDS)
-  @Fork(value = 1)
-  @Warmup(iterations = 3)
-  @Measurement(iterations = 10)
   public void multipleConsumersRabbitConfigProducerLatency() {
     multipleConsumersRabbitRunner.producerList()
         .forEach(Producer::produceMessage);
@@ -145,9 +127,6 @@ public class QueueBenchmark {
   @Benchmark
   @BenchmarkMode(Mode.AverageTime)
   @OutputTimeUnit(TimeUnit.MILLISECONDS)
-  @Fork(value = 1)
-  @Warmup(iterations = 3)
-  @Measurement(iterations = 10)
   public void multipleConsumersRabbitConfigConsumerLatency() {
     multipleConsumersRabbitRunner.consumerList()
         .forEach(Consumer::consumeMessage);
@@ -156,9 +135,6 @@ public class QueueBenchmark {
   @Benchmark
   @BenchmarkMode(Mode.Throughput)
   @OutputTimeUnit(TimeUnit.SECONDS)
-  @Fork(value = 1)
-  @Warmup(iterations = 3)
-  @Measurement(iterations = 10)
   public void multipleConsumersRabbitConfigThroughput() {
     multipleConsumersRabbitRunner.run();
   }
@@ -166,9 +142,6 @@ public class QueueBenchmark {
   @Benchmark
   @BenchmarkMode(Mode.AverageTime)
   @OutputTimeUnit(TimeUnit.MILLISECONDS)
-  @Fork(value = 1)
-  @Warmup(iterations = 3)
-  @Measurement(iterations = 10)
   public void loadBalancingAndMultipleConsumersRabbitConfigProducerLatency() {
     loadBalancingAndMultipleConsumersRabbitRunner.producerList()
         .forEach(Producer::produceMessage);
@@ -177,9 +150,6 @@ public class QueueBenchmark {
   @Benchmark
   @BenchmarkMode(Mode.AverageTime)
   @OutputTimeUnit(TimeUnit.MILLISECONDS)
-  @Fork(value = 1)
-  @Warmup(iterations = 3)
-  @Measurement(iterations = 10)
   public void loadBalancingAndMultipleConsumersRabbitConfigConsumerLatency() {
     loadBalancingAndMultipleConsumersRabbitRunner.consumerList()
         .forEach(Consumer::consumeMessage);
@@ -188,9 +158,6 @@ public class QueueBenchmark {
   @Benchmark
   @BenchmarkMode(Mode.Throughput)
   @OutputTimeUnit(TimeUnit.SECONDS)
-  @Fork(value = 1)
-  @Warmup(iterations = 3)
-  @Measurement(iterations = 10)
   public void loadBalancingAndMultipleConsumersRabbitConfigThroughput() {
     loadBalancingAndMultipleConsumersRabbitRunner.run();
   }
@@ -198,9 +165,6 @@ public class QueueBenchmark {
   @Benchmark
   @BenchmarkMode(Mode.AverageTime)
   @OutputTimeUnit(TimeUnit.MILLISECONDS)
-  @Fork(value = 1)
-  @Warmup(iterations = 3)
-  @Measurement(iterations = 10)
   public void stressTestRabbitConfigProducerLatency() {
     stressTestRabbitRunner.producerList()
         .forEach(Producer::produceMessage);
@@ -209,9 +173,6 @@ public class QueueBenchmark {
   @Benchmark
   @BenchmarkMode(Mode.AverageTime)
   @OutputTimeUnit(TimeUnit.MILLISECONDS)
-  @Fork(value = 1)
-  @Warmup(iterations = 3)
-  @Measurement(iterations = 10)
   public void stressTestRabbitConfigConsumerLatency() {
     stressTestRabbitRunner.consumerList()
         .forEach(Consumer::consumeMessage);
@@ -220,9 +181,6 @@ public class QueueBenchmark {
   @Benchmark
   @BenchmarkMode(Mode.Throughput)
   @OutputTimeUnit(TimeUnit.SECONDS)
-  @Fork(value = 1)
-  @Warmup(iterations = 3)
-  @Measurement(iterations = 10)
   public void stressTestRabbitConfigThroughput() {
     stressTestRabbitRunner.run();
   }
@@ -230,9 +188,6 @@ public class QueueBenchmark {
   @Benchmark
   @BenchmarkMode(Mode.AverageTime)
   @OutputTimeUnit(TimeUnit.MILLISECONDS)
-  @Fork(value = 1)
-  @Warmup(iterations = 3)
-  @Measurement(iterations = 10)
   public void simpleKafkaProducerLatency() {
     simpleKafkaRunner.producerList()
         .forEach(Producer::produceMessage);
@@ -241,9 +196,6 @@ public class QueueBenchmark {
   @Benchmark
   @BenchmarkMode(Mode.AverageTime)
   @OutputTimeUnit(TimeUnit.MILLISECONDS)
-  @Fork(value = 1)
-  @Warmup(iterations = 3)
-  @Measurement(iterations = 10)
   public void simpleKafkaConsumerLatency() {
     simpleKafkaRunner.consumerList()
         .forEach(Consumer::consumeMessage);
@@ -252,9 +204,6 @@ public class QueueBenchmark {
   @Benchmark
   @BenchmarkMode(Mode.Throughput)
   @OutputTimeUnit(TimeUnit.SECONDS)
-  @Fork(value = 1)
-  @Warmup(iterations = 3)
-  @Measurement(iterations = 10)
   public void simpleKafkaThroughput() {
     simpleKafkaRunner.run();
   }
@@ -262,9 +211,6 @@ public class QueueBenchmark {
   @Benchmark
   @BenchmarkMode(Mode.AverageTime)
   @OutputTimeUnit(TimeUnit.MILLISECONDS)
-  @Fork(value = 1)
-  @Warmup(iterations = 3)
-  @Measurement(iterations = 10)
   public void loadBalancingKafkaProducerLatency() {
     loadBalancingKafkaRunner.producerList()
         .forEach(Producer::produceMessage);
@@ -273,9 +219,6 @@ public class QueueBenchmark {
   @Benchmark
   @BenchmarkMode(Mode.AverageTime)
   @OutputTimeUnit(TimeUnit.MILLISECONDS)
-  @Fork(value = 1)
-  @Warmup(iterations = 3)
-  @Measurement(iterations = 10)
   public void loadBalancingKafkaConsumerLatency() {
     loadBalancingKafkaRunner.consumerList()
         .forEach(Consumer::consumeMessage);
@@ -284,9 +227,6 @@ public class QueueBenchmark {
   @Benchmark
   @BenchmarkMode(Mode.Throughput)
   @OutputTimeUnit(TimeUnit.SECONDS)
-  @Fork(value = 1)
-  @Warmup(iterations = 3)
-  @Measurement(iterations = 10)
   public void loadBalancingKafkaThroughput() {
     loadBalancingKafkaRunner.run();
   }
@@ -294,9 +234,6 @@ public class QueueBenchmark {
   @Benchmark
   @BenchmarkMode(Mode.AverageTime)
   @OutputTimeUnit(TimeUnit.MILLISECONDS)
-  @Fork(value = 1)
-  @Warmup(iterations = 3)
-  @Measurement(iterations = 10)
   public void loadBalancingKafkaConfigProducerLatency() {
     loadBalancingKafkaRunner.producerList()
         .forEach(Producer::produceMessage);
@@ -305,9 +242,6 @@ public class QueueBenchmark {
   @Benchmark
   @BenchmarkMode(Mode.AverageTime)
   @OutputTimeUnit(TimeUnit.MILLISECONDS)
-  @Fork(value = 1)
-  @Warmup(iterations = 3)
-  @Measurement(iterations = 10)
   public void loadBalancingKafkaConfigConsumerLatency() {
     loadBalancingKafkaRunner.consumerList()
         .forEach(Consumer::consumeMessage);
@@ -316,9 +250,6 @@ public class QueueBenchmark {
   @Benchmark
   @BenchmarkMode(Mode.Throughput)
   @OutputTimeUnit(TimeUnit.SECONDS)
-  @Fork(value = 1)
-  @Warmup(iterations = 3)
-  @Measurement(iterations = 10)
   public void loadBalancingKafkaConfigThroughput() {
     loadBalancingKafkaRunner.run();
   }
@@ -326,9 +257,6 @@ public class QueueBenchmark {
   @Benchmark
   @BenchmarkMode(Mode.AverageTime)
   @OutputTimeUnit(TimeUnit.MILLISECONDS)
-  @Fork(value = 1)
-  @Warmup(iterations = 3)
-  @Measurement(iterations = 10)
   public void loadBalancingAndMultipleConsumersKafkaConfigProducerLatency() {
     loadBalancingAndMultipleConsumersKafkaRunner.producerList()
         .forEach(Producer::produceMessage);
@@ -337,9 +265,6 @@ public class QueueBenchmark {
   @Benchmark
   @BenchmarkMode(Mode.AverageTime)
   @OutputTimeUnit(TimeUnit.MILLISECONDS)
-  @Fork(value = 1)
-  @Warmup(iterations = 3)
-  @Measurement(iterations = 10)
   public void loadBalancingAndMultipleConsumersKafkaConfigConsumerLatency() {
     loadBalancingAndMultipleConsumersKafkaRunner.consumerList()
         .forEach(Consumer::consumeMessage);
@@ -348,9 +273,6 @@ public class QueueBenchmark {
   @Benchmark
   @BenchmarkMode(Mode.Throughput)
   @OutputTimeUnit(TimeUnit.SECONDS)
-  @Fork(value = 1)
-  @Warmup(iterations = 3)
-  @Measurement(iterations = 10)
   public void loadBalancingAndMultipleConsumersKafkaConfigThroughput() {
     loadBalancingAndMultipleConsumersKafkaRunner.run();
   }
@@ -358,9 +280,6 @@ public class QueueBenchmark {
   @Benchmark
   @BenchmarkMode(Mode.AverageTime)
   @OutputTimeUnit(TimeUnit.MILLISECONDS)
-  @Fork(value = 1)
-  @Warmup(iterations = 3)
-  @Measurement(iterations = 10)
   public void stressTestKafkaConfigConsumerLatency() {
     stressTestKafkaRunner.consumerList()
         .forEach(Consumer::consumeMessage);
@@ -369,9 +288,6 @@ public class QueueBenchmark {
   @Benchmark
   @BenchmarkMode(Mode.AverageTime)
   @OutputTimeUnit(TimeUnit.MILLISECONDS)
-  @Fork(value = 1)
-  @Warmup(iterations = 3)
-  @Measurement(iterations = 10)
   public void stressTestKafkaConfigProducerLatency() {
     stressTestKafkaRunner.producerList()
         .forEach(Producer::produceMessage);
@@ -381,9 +297,6 @@ public class QueueBenchmark {
   @Benchmark
   @BenchmarkMode(Mode.Throughput)
   @OutputTimeUnit(TimeUnit.SECONDS)
-  @Fork(value = 1)
-  @Warmup(iterations = 3)
-  @Measurement(iterations = 10)
   public void stressTestKafkaConfigThroughput() {
     stressTestKafkaRunner.run();
   }
