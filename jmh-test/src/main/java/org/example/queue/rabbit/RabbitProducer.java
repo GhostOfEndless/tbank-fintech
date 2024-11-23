@@ -11,12 +11,11 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class RabbitProducer implements Producer {
 
-  private final static String QUEUE_NAME = "queue";
   private final RabbitTemplate rabbitTemplate;
 
   @Override
-  public void produceMessage(String topic, String message) {
-    rabbitTemplate.convertAndSend(QUEUE_NAME, message);
+  public void produceMessage() {
+    rabbitTemplate.convertAndSend("topic", "message");
   }
 
   @Override

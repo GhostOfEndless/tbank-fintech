@@ -15,10 +15,10 @@ public class RabbitConsumer implements Consumer {
   private final RabbitTemplate rabbitTemplate;
 
   @Override
-  @RabbitListener(queues = "queue")
+  @RabbitListener(queues = "topic")
   public void consumeMessage() {
-    rabbitTemplate.receive("queue");
-    log.info("Rabbit consumer message received");
+    rabbitTemplate.receive("topic");
+    log.debug("Rabbit consumer message received");
   }
 
   @Override

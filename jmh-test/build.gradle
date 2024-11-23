@@ -20,7 +20,7 @@ dependencies {
     testImplementation 'org.openjdk.jmh:jmh-core:1.37'
     testAnnotationProcessor 'org.openjdk.jmh:jmh-generator-annprocess:1.37'
 
-    implementation 'org.springframework.amqp:spring-rabbit:3.2.0'
+    implementation 'org.springframework.amqp:spring-rabbit:3.1.7'
     implementation 'org.springframework.kafka:spring-kafka:3.2.4'
 
     testImplementation 'org.springframework.boot:spring-boot-starter-test'

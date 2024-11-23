@@ -12,7 +12,7 @@ public class KafkaConsumer implements Consumer {
   @Override
   @KafkaListener(topics = "topic", groupId = "group_id")
   public void consumeMessage() {
-    log.info("Kafka consumer message received");
+    log.debug("Kafka consumer message received");
   }
 
   @Override

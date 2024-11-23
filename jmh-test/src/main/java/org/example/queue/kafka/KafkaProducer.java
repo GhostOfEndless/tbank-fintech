@@ -11,11 +11,11 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class KafkaProducer implements Producer {
 
-  private final KafkaTemplate<Integer, String> kafkaTemplate;
+  private final KafkaTemplate<String, String> kafkaTemplate;
 
   @Override
-  public void produceMessage(String topic, String message) {
-    kafkaTemplate.send(topic, message);
+  public void produceMessage() {
+    kafkaTemplate.send("topic", "message");
   }
 
   @Override
