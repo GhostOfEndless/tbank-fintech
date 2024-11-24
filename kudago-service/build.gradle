@@ -42,7 +42,10 @@ dependencies {
     annotationProcessor 'org.hibernate:hibernate-jpamodelgen:6.6.1.Final'
     implementation project(':log-aspect')
 
+    // logging and metrics
     implementation 'net.logstash.logback:logstash-logback-encoder:8.0'
+    implementation 'io.micrometer:micrometer-registry-prometheus:1.14.1'
+    implementation 'org.springframework.boot:spring-boot-starter-actuator:3.4.0'
 
     // tests
     testImplementation 'org.springframework.boot:spring-boot-starter-test'

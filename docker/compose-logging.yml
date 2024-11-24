@@ -36,9 +36,6 @@ services:
       - ../logging/logstash/config/pipeline/logstash.conf:/usr/share/logstash/pipeline/logstash.conf
       - ../logging/logstash/config/logstash.yml:/usr/share/logstash/config/logstash.yml
       - ../logs:/usr/share/logstash/logs
-    # noinspection HttpUrlsUsage
-    command: >
-      sh -c "until curl -s http://elasticsearch:9200; do echo 'Waiting for Elasticsearch...'; sleep 5; done && logstash -f /usr/share/logstash/pipeline/logstash.conf"
     networks:
       - app-tier
     ports:

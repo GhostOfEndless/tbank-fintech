@@ -1,6 +1,7 @@
 include:
   - compose-network.yml
   - compose-logging.yml
+  - compose-metrics.yml
 
 services:
   db:

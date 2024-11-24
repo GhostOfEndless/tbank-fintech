@@ -9,9 +9,13 @@ import com.example.service.history.CategoryHistoryCaretaker;
 import jakarta.validation.Valid;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.slf4j.MDC;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -21,6 +25,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+@Slf4j
 @LogExecutionTime
 @RestController
 @RequestMapping("/api/v1/places/categories")
@@ -47,9 +52,13 @@ public class CategoryRestController {
 
   @PostMapping
   @PreAuthorize("hasAuthority('ADMIN')")
-  public ResponseEntity<Category> createCategory(@Valid @RequestBody CategoryPayload category) {
-    return ResponseEntity.status(HttpStatus.CREATED)
-        .body(categoryService.createCategory(category.slug(), category.name()));
+  public ResponseEntity<Category> createCategory(@Valid @RequestBody CategoryPayload category, Authentication authentication) {
+    var userDetails = (UserDetails) authentication.getPrincipal();
+    try (var ignored = MDC.putCloseable("Username", userDetails.getUsername())) {
+      log.debug("Creating new category");
+      return ResponseEntity.status(HttpStatus.CREATED)
+          .body(categoryService.createCategory(category.slug(), category.name()));
+    }
   }
 
   @PutMapping("/{id}")
