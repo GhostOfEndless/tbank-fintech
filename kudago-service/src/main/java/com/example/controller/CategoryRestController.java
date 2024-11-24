@@ -52,7 +52,10 @@ public class CategoryRestController {
 
   @PostMapping
   @PreAuthorize("hasAuthority('ADMIN')")
-  public ResponseEntity<Category> createCategory(@Valid @RequestBody CategoryPayload category, Authentication authentication) {
+  public ResponseEntity<Category> createCategory(
+      @Valid @RequestBody CategoryPayload category,
+      Authentication authentication
+  ) {
     var userDetails = (UserDetails) authentication.getPrincipal();
     try (var ignored = MDC.putCloseable("Username", userDetails.getUsername())) {
       log.debug("Creating new category");
