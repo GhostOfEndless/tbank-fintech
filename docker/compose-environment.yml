@@ -1,3 +1,7 @@
+include:
+  - compose-network.yml
+  - compose-logging.yml
+
 services:
   db:
     image: postgres:17
@@ -40,11 +44,6 @@ services:
       - ../migrations/db/changelog:/liquibase/changelog/
     networks:
       - app-tier
-
-networks:
-  app-tier:
-    name: app-tier
-    driver: bridge
 
 volumes:
   kudago-db:

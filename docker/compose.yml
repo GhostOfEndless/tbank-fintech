@@ -1,6 +1,7 @@
-# noinspection ComposeUnknownKeys
 include:
   - compose-environment.yml
+  - compose-network.yml
+  - compose-logging.yml
 
 services:
   kudago-service:
