@@ -12,6 +12,7 @@ import com.example.exception.entity.UserAlreadyRegisterException;
 import com.example.exception.entity.UserNotFoundException;
 import com.example.repository.security.AppUserRepository;
 import com.example.repository.security.TokenRepository;
+import io.micrometer.core.annotation.Timed;
 import lombok.RequiredArgsConstructor;
 import org.jspecify.annotations.NonNull;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -31,6 +32,7 @@ public class AuthenticationService {
   private final PasswordEncoder passwordEncoder;
   private final JwtService jwtService;
 
+  @Timed("authenticateRequest")
   public AuthenticationResponse authenticate(@NonNull AuthenticationRequest request) {
     authenticationManager.authenticate(
         new UsernamePasswordAuthenticationToken(

@@ -1,0 +1,18 @@
+include:
+  - compose-network.yml
+
+services:
+  prometheus:
+    image: prom/prometheus:v2.55.1
+    ports:
+      - '9090:9090'
+    volumes:
+      - ../metrics/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus:/prometheus
+    networks:
+      - app-tier
+
+volumes:
+  prometheus:
+    name: prometheus
+    driver: local
