@@ -1,4 +1,5 @@
 include 'kudago-service'
 include 'log-aspect'
 include 'currency-service'
+include 'jmh-test'
 

@@ -1,0 +1,31 @@
+Benchmark                                                                     Mode  Cnt        Score       Error  Units
+QueueBenchmark.loadBalancingAndMultipleConsumersKafkaConfigThroughput        thrpt   10   509956,990 ± 11751,439  ops/s
+QueueBenchmark.loadBalancingAndMultipleConsumersRabbitConfigThroughput       thrpt   10      254,869 ±     3,252  ops/s
+QueueBenchmark.loadBalancingKafkaConfigThroughput                            thrpt   10   560970,790 ± 14669,111  ops/s
+QueueBenchmark.loadBalancingKafkaThroughput                                  thrpt   10   559208,642 ± 14176,991  ops/s
+QueueBenchmark.loadBalancingRabbitConfigThroughput                           thrpt   10      672,223 ±    11,932  ops/s
+QueueBenchmark.multipleConsumersRabbitConfigThroughput                       thrpt   10      267,513 ±    14,260  ops/s
+QueueBenchmark.simpleKafkaThroughput                                         thrpt   10  1639262,326 ± 58637,237  ops/s
+QueueBenchmark.simpleRabbitThroughput                                        thrpt   10      784,714 ±     5,799  ops/s
+QueueBenchmark.stressTestKafkaConfigThroughput                               thrpt   10   150420,793 ±  5935,502  ops/s
+QueueBenchmark.stressTestRabbitConfigThroughput                              thrpt   10       71,823 ±     1,202  ops/s
+QueueBenchmark.loadBalancingAndMultipleConsumersKafkaConfigConsumerLatency    avgt   10       ≈ 10⁻⁵              ms/op
+QueueBenchmark.loadBalancingAndMultipleConsumersKafkaConfigProducerLatency    avgt   10        0,002 ±     0,001  ms/op
+QueueBenchmark.loadBalancingAndMultipleConsumersRabbitConfigConsumerLatency   avgt   10        3,804 ±     0,078  ms/op
+QueueBenchmark.loadBalancingAndMultipleConsumersRabbitConfigProducerLatency   avgt   10        4,337 ±    20,019  ms/op
+QueueBenchmark.loadBalancingKafkaConfigConsumerLatency                        avgt   10       ≈ 10⁻⁵              ms/op
+QueueBenchmark.loadBalancingKafkaConfigProducerLatency                        avgt   10        0,002 ±     0,001  ms/op
+QueueBenchmark.loadBalancingKafkaConsumerLatency                              avgt   10       ≈ 10⁻⁵              ms/op
+QueueBenchmark.loadBalancingKafkaProducerLatency                              avgt   10        0,002 ±     0,001  ms/op
+QueueBenchmark.loadBalancingRabbitConfigConsumerLatency                       avgt   10        1,252 ±     0,026  ms/op
+QueueBenchmark.loadBalancingRabbitConfigProducerLatency                       avgt   10        0,139 ±     0,008  ms/op
+QueueBenchmark.multipleConsumersRabbitConfigConsumerLatency                   avgt   10        3,758 ±     0,168  ms/op
+QueueBenchmark.multipleConsumersRabbitConfigProducerLatency                   avgt   10        0,045 ±     0,001  ms/op
+QueueBenchmark.simpleKafkaConsumerLatency                                     avgt   10       ≈ 10⁻⁵              ms/op
+QueueBenchmark.simpleKafkaProducerLatency                                     avgt   10        0,001 ±     0,001  ms/op
+QueueBenchmark.simpleRabbitConsumerLatency                                    avgt   10        1,259 ±     0,022  ms/op
+QueueBenchmark.simpleRabbitProducerLatency                                    avgt   10        0,047 ±     0,004  ms/op
+QueueBenchmark.stressTestKafkaConfigConsumerLatency                           avgt   10       ≈ 10⁻⁵              ms/op
+QueueBenchmark.stressTestKafkaConfigProducerLatency                           avgt   10        0,006 ±     0,001  ms/op
+QueueBenchmark.stressTestRabbitConfigConsumerLatency                          avgt   10       12,516 ±     0,309  ms/op
+QueueBenchmark.stressTestRabbitConfigProducerLatency                          avgt   10        0,478 ±     0,025  ms/op
